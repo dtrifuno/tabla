@@ -1,40 +1,28 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <img alt="Vue logo" src="./assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
 <script>
+import HelloWorld from './components/HelloWorld.vue'
+
 export default {
-  name: "App"
-};
+  name: 'app',
+  components: {
+    HelloWorld
+  }
+}
 </script>
 
 <style>
-:root {
-  --red: #e6261f;
-  --orange: #eb7532;
-  --yellow: #f7d038;
-  --limegreen: #a3e048;
-  --shamrock: #49da9a;
-  --azure: #34bbe6;
-  --royalblue: #4355db;
-  --violet: #d23be7;
-}
-
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-
-.item-dropzone-area {
-  background-color: green;
-  width: 100%;
-  height: 1rem;
 }
 </style>

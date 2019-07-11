@@ -7,18 +7,20 @@ class User(db.Document):
 
 
 class Table(db.Document):
-    title = db.StringField(required=True)
+    name = db.StringField(required=True)
+    order = db.IntField()
     owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
 
 
 class Column(db.Document):
-    title = db.StringField(required=True)
+    name = db.StringField(required=True)
+    order = db.IntField()
     table = db.ReferenceField(Table, reverse_delete_rule=db.CASCADE)
-    position = db.IntField()
+    owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
 
 
 class Entry(db.Document):
-    title = db.StringField(required=True)
-    text = db.StringField()
-    position = db.IntField()
+    name = db.StringField()
+    order = db.IntField()
     column = db.ReferenceField(Column, reverse_delete_rule=db.CASCADE)
+    owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)

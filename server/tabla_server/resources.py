@@ -1,29 +1,27 @@
 import json
 
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from passlib.hash import pbkdf2_sha256
 
 from tabla_server import db
-from tabla_server.models import User
+from tabla_server import models
 
 
-parser = reqparse.RequestParser()
-parser.add_argument(
-    'email', help='This field cannot be blank', required=True)
-parser.add_argument(
-    'password', help='This field cannot be blank', required=True)
+user_parser = reqparse.RequestParser()
+user_parser.add_argument('email', required=True)
+user_parser.add_argument('password', required=True)
 
 
 class UserRegistration(Resource):
     def post(self):
-        print(self)
-        data = parser.parse_args()
+        data = user_parser.parse_args()
         print(f'got a post to /registration - {data}')
-        user_exists = User.objects(email=data['email'])
+        user_exists = models.User.objects(email=data['email'])
         if user_exists:
             return {
-                'message': f'{data["email"]} is already registered.'}
-        new_user = User(
+                'message': f'{data["email"]} is already registered.'}, 500
+        new_user = models.User(
             email=data['email'],
             password=pbkdf2_sha256.hash(data['password'])
         )
@@ -38,42 +36,145 @@ class UserRegistration(Resource):
 
 class UserLogin(Resource):
     def post(self):
-        data = parser.parse_args()
-        search_results = User.objects(email=data['email'])
-        if search_results:
-            current_user = search_results[0]
+        data = user_parser.parse_args()
+        print(f'got a post to /login - {data}')
+        current_user = models.User.objects(email=data['email']).first()
+        if current_user is not None:
             validated = pbkdf2_sha256.verify(data['password'],
                                              current_user.password)
-        if not search_results or not validated:
-            return {'message': 'invalid credentials'}
-        return {'message': f'Logged in as {current_user.email}'}
+        if current_user is None or not validated:
+            return {'message': 'invalid credentials'}, 401
+
+        access_token = create_access_token(identity=data['email'])
+        return {'message': f'Logged in as {current_user.email}', 'access_token': access_token}
 
 
-class UserLogoutAccess(Resource):
-    def post(self):
-        return {'message': 'User logout'}
-
-
-class UserLogoutRefresh(Resource):
-    def post(self):
-        return {'message': 'User logout'}
-
-
-class TokenRefresh(Resource):
-    def post(self):
-        return {'message': 'Token refresh'}
-
-
-class AllUsers(Resource):
+class Tables(Resource):
+    @jwt_required
     def get(self):
-        return {'message': 'List of users'}
+        print(f'got a get to /tables')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        tables = models.Table.objects(owner=current_user)
+        if tables:
+            return tables.to_json()
+        else:
+            {}, 500
 
-    def delete(self):
-        return {'message': 'Delete all users'}
+
+class GetDeleteTable(Resource):
+    @jwt_required
+    def get(self, table_id):
+        print(f'got a get to /table/{table_id}')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        if current_user:
+            table = models.Table.objects(id=table_id).first()
+            return table.to_json()
+        else:
+            {}, 500
+
+    @jwt_required
+    def delete(self, table_id):
+        print(f'got a delete to /table/{table_id}')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(
+            id=table_id, owner=current_user).first()
+        if table:
+            table.delete()
+            return {}
+        else:
+            return {}, 500
 
 
-class SecretResource(Resource):
-    def get(self):
+parser = reqparse.RequestParser()
+parser.add_argument('tableName')
+parser.add_argument('tableId')
+parser.add_argument('columnName')
+parser.add_argument('columnId')
+parser.add_argument('entryName')
+parser.add_argument('entryId')
+
+
+class Table(Resource):
+    @jwt_required
+    def post(self):
+        data = parser.parse_args()
+        print(data)
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        print(f'got a post to /table - {data}')
+        if current_user is not None:
+            new_table = models.Table(
+                name=data['tableName'], owner=current_user)
+            new_table.save()
+            return new_table.to_json()
+        else:
+            return {}, 500
+
+    @jwt_required
+    def put(self):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
         return {
             'answer': 42
         }
+
+
+class Column(Resource):
+    @jwt_required
+    def post(self):
+        data = parser.parse_args()
+        print(f'got a post to /column')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(
+            owner=current_user, id=data['tableId']).first()
+        if not table:
+            return {}, 500
+        column = models.Column(name=data['columnName'], table=table)
+        column.save()
+        return column.to_json()
+
+    @jwt_required
+    def put(self):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        return {
+            'answer': 42
+        }
+
+
+class DeleteColumn(Resource):
+    @jwt_required
+    def delete(self, column_id):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        column = models.Column.objects(
+            id=column_id, owner=current_user).first()
+        if column:
+            column.delete()
+            return {}
+        else:
+            return {}, 500
+
+
+class Entry(Resource):
+    @jwt_required
+    def post(self):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        return {
+            'answer': 42
+        }
+
+    @jwt_required
+    def put(self):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        return {
+            'answer': 42
+        }
+
+
+class DeleteEntry(Resource):
+    @jwt_required
+    def delete(self, entry_id):
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        entry = models.Entry.objects(id=entry_id, owner=current_user).first()
+        if entry:
+            entry.delete()
+            return {}
+        else:
+            return {}, 500

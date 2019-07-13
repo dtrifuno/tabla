@@ -5,17 +5,17 @@
     <div class="list-group col-10 col-lg-3 mx-auto">
       <div @click="addTableModal" class="new-table-item">Create New Table</div>
       <br />
-      <ul class="table-list">
+      <draggable v-model="tables" class="table-list">
         <table-entry
-          v-for="item in this.$store.state.tables"
+          v-for="item in tables"
           :name="item.name"
           :id="item.id"
-          :onClickTitle="titleClick"
+          :onClickTitle="() => titleClick(item.id, item.name)"
           :onClickDelete="() => deleteClick(item.id, item.name)"
           class="table-item"
           v-bind:key="item.id"
         />
-      </ul>
+      </draggable>
     </div>
   </div>
 </template>
@@ -36,7 +36,7 @@
 
 .table-list .table-item {
   padding: 0 0.25rem 0 0.75rem;
-  border: 1px solid rgba(0, 0, 0, 0.125);
+  border: 0.75px solid rgba(0, 0, 0, 0.125);
   background-color: transparent;
   cursor: pointer;
   text-align: left;
@@ -55,6 +55,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import draggable from 'vuedraggable';
 
 import { getTable } from '../api';
 
@@ -64,34 +65,36 @@ import TableEntry from '../components/TableEntry';
 
 export default {
   name: 'Tables',
-  components: { AddTable, DeleteTable, TableEntry },
+  components: {
+    AddTable,
+    DeleteTable,
+    TableEntry,
+    draggable,
+  },
+  computed: {
+    tables: {
+      get() {
+        return this.$store.state.tables;
+      },
+      set(value) {
+        this.reorderTables(value);
+      },
+    },
+  },
   methods: {
-    ...mapActions(['setTables', 'setCurrentTable']),
+    ...mapActions(['setTables', 'setCurrentTable', 'reorderTables']),
     addTableModal() {
       this.$modal.show('add-table', {
         height: 'auto',
       });
     },
-    titleClick() {
-      alert('title click');
+    async titleClick(id) {
+      await this.setCurrentTable(id);
     },
     deleteClick(id, name) {
       this.$modal.show('delete-table', {
         tableName: name,
         tableId: id,
-      });
-    },
-    async fetchTable(tableId) {
-      console.log(tableId);
-      await getTable(this.$store.state.token, tableId).then((response) => {
-        console.log(response);
-        const currentTable = {};
-        currentTable.id = tableId;
-        currentTable.name = this.$store.state.tables.filter(
-          x => x.id === tableId,
-        )[0].name;
-        currentTable.columns = JSON.parse(response.data);
-        this.setCurrentTable(currentTable);
       });
     },
   },

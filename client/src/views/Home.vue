@@ -55,14 +55,6 @@ export default {
         console.log('logged in');
         this.fetchTables();
       });
-      /*
-      await getTables(this.$store.state.token).then((response) => {
-        const tables = JSON.parse(response.data);
-        const fixedTables = tables.map(fixId);
-        this.setTables(fixedTables);
-        console.log(response.data);
-      });
-      */
     },
   },
 };

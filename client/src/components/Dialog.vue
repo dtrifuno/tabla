@@ -1,29 +1,24 @@
 
 <template>
-  <modal name="add-table" transition="pop-out" :adaptive="adaptive" :height="height">
+  <modal
+    name="dialog"
+    transition="pop-out"
+    :adaptive="adaptive"
+    :height="height"
+    @before-open="beforeOpen"
+  >
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Create a new table</div>
-        <div class="dialog-c-text">
-          <div class="form-group">
-            <label for="title-form">Please enter a title for the new table:</label>
-            <input id="title-form" class="form-control" v-model="table_name" placeholder="Title" />
-          </div>
-        </div>
+        <div class="dialog-title">{{this.title}}</div>
+        <div class="dialog-c-text">{{this.body}}</div>
       </div>
       <div class="dialog-buttons">
         <button
           type="button"
           class="dialog-button"
-          style="flex: 1 1 100%"
-          @click="createClick"
-        >CREATE</button>
-        <button
-          type="button"
-          class="dialog-button"
-          style="flex: 1 1 100%"
-          @click="closeModal"
-        >CANCEL</button>
+          @click="this.confirmClick"
+        >{{ this.confirmLabel }}</button>
+        <button type="button" class="dialog-button" @click="this.closeModal">{{ this.cancelLabel }}</button>
       </div>
     </div>
   </modal>
@@ -47,6 +42,10 @@
   flex: 0 1 auto;
   width: 100%;
   border-top: 1px solid #eee;
+}
+
+.dialog-button {
+  flex: 1 1 100%;
 }
 
 .dialog-title {
@@ -85,26 +84,36 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'AddTable',
+  name: 'delete-table',
   data() {
     return {
-      table_name: '',
+      tableName: '',
+      tableId: '',
       adaptive: true,
       height: 'auto',
       modal: 0,
     };
   },
   methods: {
-    ...mapActions(['createTable']),
-    closeModal() {
-      this.table_name = '';
-      this.$modal.hide('add-table');
+    ...mapActions(['removeTable']),
+    beforeOpen(event) {
+      this.title = event.params.title;
+      this.body = event.params.body;
+      this.confirmLabel = event.params.confirmLabel
+        ? event.param.confirmLabel
+        : 'YES';
+      this.cancelLabel = event.params.cancelLabel
+        ? event.params.cancelLabel
+        : 'NO';
+      this.confirmClick = event.params.confirmClick;
     },
-    async createClick() {
-      const order = this.$store.state.tables.length;
-      this.createTable(this.table_name, order);
-      this.table_name = '';
-      this.$modal.hide('add-table');
+    closeModal() {
+      this.$modal.hide('delete-table');
+    },
+    async confirmClick() {
+      console.log(this.tableId);
+      this.removeTable(this.tableId);
+      this.$modal.hide('delete-table');
     },
   },
 };

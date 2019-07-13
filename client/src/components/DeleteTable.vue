@@ -10,9 +10,13 @@
     <div class="dialog">
       <div class="dialog-content">
         <div class="dialog-title">Delete a table</div>
-        <div
-          class="dialog-c-text"
-        >Are you sure you want to delete table "{{this.tableName}}"? This operation is not reversible.</div>
+        <div class="dialog-c-text">
+          <p>
+            Are you sure you want to delete the table
+            <b>{{this.tableName}}</b>?
+          </p>
+          <p>This action will delete all entries in the table and cannot be undone.</p>
+        </div>
       </div>
       <div class="dialog-buttons">
         <button type="button" class="dialog-button" style="flex: 1 1 100%" @click="confirmClick">YES</button>

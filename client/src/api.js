@@ -23,12 +23,37 @@ function getTables(token) {
   });
 }
 
+function putTables(token, tables) {
+  return axios.put(
+    'http://localhost:5000/tables',
+    {
+      tables,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+}
+
 // /table
-function postTable(token, tableName) {
+function postTable(token, name, order) {
   return axios.post(
     'http://localhost:5000/table',
     {
-      tableName,
+      name,
+      order,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+}
+
+function putTable(token, table) {
+  return axios.put(
+    `http://localhost:5000/table/${table.id}`,
+    {
+      ...table,
     },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -53,19 +78,28 @@ function getTable(token, tableId) {
 }
 
 // /column
-function postColumn(token, tableId, columnName) {
-  return (
-    axios.post('http://localhost:5000/column'),
+function postColumn(token, tableId, name, order) {
+  return axios.post(
+    'http://localhost:5000/column',
     {
       tableId,
-      columnName,
+      name,
+      order,
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
 }
 
 export {
- login, registerUser, postTable, deleteTable, getTables, getTable, postColumn 
+  login,
+  registerUser,
+  postTable,
+  deleteTable,
+  getTables,
+  putTables,
+  getTable,
+  putTable,
+  postColumn,
 };

@@ -1,29 +1,26 @@
 
 <template>
-  <modal name="add-table" transition="pop-out" :adaptive="adaptive" :height="height">
+  <modal
+    name="delete-column"
+    transition="pop-out"
+    :adaptive="adaptive"
+    :height="height"
+    @before-open="beforeOpen"
+  >
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Create a new table</div>
+        <div class="dialog-title">Delete a column</div>
         <div class="dialog-c-text">
-          <div class="form-group">
-            <label for="title-form">Please enter a title for the new table:</label>
-            <input id="title-form" class="form-control" v-model="table_name" placeholder="Title" />
-          </div>
+          <p>
+            Are you sure you want to delete the column
+            <b>{{this.columnName}}</b>?
+          </p>
+          <p>This action will delete all entries in the column and cannot be undone.</p>
         </div>
       </div>
       <div class="dialog-buttons">
-        <button
-          type="button"
-          class="dialog-button"
-          style="flex: 1 1 100%"
-          @click="createClick"
-        >CREATE</button>
-        <button
-          type="button"
-          class="dialog-button"
-          style="flex: 1 1 100%"
-          @click="closeModal"
-        >CANCEL</button>
+        <button type="button" class="dialog-button" style="flex: 1 1 100%" @click="confirmClick">YES</button>
+        <button type="button" class="dialog-button" style="flex: 1 1 100%" @click="closeModal">NO</button>
       </div>
     </div>
   </modal>
@@ -85,26 +82,28 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'AddTable',
+  name: 'delete-column',
   data() {
     return {
-      table_name: '',
+      tableName: '',
+      tableId: '',
       adaptive: true,
       height: 'auto',
       modal: 0,
     };
   },
   methods: {
-    ...mapActions(['createTable']),
-    closeModal() {
-      this.table_name = '';
-      this.$modal.hide('add-table');
+    ...mapActions(['removeColumn']),
+    beforeOpen(event) {
+      this.columnId = event.params.columnId;
+      this.columnName = event.params.columnName;
     },
-    async createClick() {
-      const order = this.$store.state.tables.length;
-      this.createTable(this.table_name, order);
-      this.table_name = '';
-      this.$modal.hide('add-table');
+    closeModal() {
+      this.$modal.hide('delete-column');
+    },
+    async confirmClick() {
+      this.removeColumn(this.columnId);
+      this.$modal.hide('delete-column');
     },
   },
 };

@@ -7,7 +7,7 @@
         <div class="dialog-c-text">
           <div class="form-group">
             <label for="title-form">Title of new column</label>
-            <input id="title-form" class="form-control" v-model="column_title" placeholder="Title" />
+            <input id="title-form" class="form-control" v-model="columnTitle" placeholder="Title" />
           </div>
         </div>
       </div>
@@ -16,7 +16,7 @@
           type="button"
           class="dialog-button"
           style="flex: 1 1 100%"
-          @click="$emit('close')"
+          @click="createClick"
         >CREATE</button>
         <button
           type="button"
@@ -82,27 +82,27 @@
 
 
 <script>
-import { createColumn } from '../api';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'AddColumn',
   data() {
     return {
-      column_title: '',
+      columnTitle: '',
       adaptive: true,
       height: 'auto',
       modal: 0,
     };
   },
   methods: {
+    ...mapActions(['createColumn']),
     closeModal() {
-      this.column_title = '';
+      this.columnTitle = '';
       this.$modal.hide('add-column');
     },
     createClick() {
-      console.log(this.$store.state.token);
-      createColumn(this.column_title, this.$store.state.token);
-      this.table_title = '';
+      this.createColumn(this.columnTitle);
+      this.columnTitle = '';
       this.$modal.hide('add-column');
     },
   },

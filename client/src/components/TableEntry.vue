@@ -11,6 +11,8 @@
 .container {
   display: flex;
   flex-direction: row;
+  align-content: center;
+  justify-content: center;
 }
 
 .title {
@@ -20,7 +22,7 @@
 
 .icon {
   flex: 0 1 auto;
-  padding: 2.5%;
+  display: flex;
 }
 
 .icon:hover {
@@ -29,7 +31,7 @@
 </style>
 
 <script>
-import CloseIcon from 'vue-material-design-icons/Close';
+import CloseIcon from 'vue-material-design-icons/Close.vue';
 
 export default {
   name: 'table-entry',

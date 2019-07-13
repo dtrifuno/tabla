@@ -1,13 +1,16 @@
 
 <template>
-  <modal name="add-table" transition="pop-out" :adaptive="adaptive" :height="height">
+  <modal name="rename-table" transition="pop-out" :adaptive="adaptive" :height="height">
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Create a new table</div>
+        <div class="dialog-title">Rename table</div>
         <div class="dialog-c-text">
           <div class="form-group">
-            <label for="title-form">Please enter a title for the new table:</label>
-            <input id="title-form" class="form-control" v-model="table_name" placeholder="Title" />
+            <label for="title-form">
+              Enter a new title for the table
+              <b>{{this.$store.state.currentTable.name}}</b>:
+            </label>
+            <input id="title-form" class="form-control" v-model="newTableName" placeholder="Title" />
           </div>
         </div>
       </div>
@@ -16,8 +19,8 @@
           type="button"
           class="dialog-button"
           style="flex: 1 1 100%"
-          @click="createClick"
-        >CREATE</button>
+          @click="renameClick"
+        >RENAME</button>
         <button
           type="button"
           class="dialog-button"
@@ -85,26 +88,27 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'AddTable',
+  name: 'RenameTable',
   data() {
     return {
-      table_name: '',
+      newTableName: '',
       adaptive: true,
       height: 'auto',
       modal: 0,
     };
   },
   methods: {
-    ...mapActions(['createTable']),
+    ...mapActions(['renameCurrentTable', 'fetchTables']),
     closeModal() {
-      this.table_name = '';
-      this.$modal.hide('add-table');
+      this.newTableName = '';
+      this.$modal.hide('rename-table');
     },
-    async createClick() {
-      const order = this.$store.state.tables.length;
-      this.createTable(this.table_name, order);
-      this.table_name = '';
-      this.$modal.hide('add-table');
+    async renameClick() {
+      await this.renameCurrentTable(this.newTableName).then(() => {
+        this.fetchTables();
+      });
+      this.newTableName = '';
+      this.$modal.hide('rename-table');
     },
   },
 };

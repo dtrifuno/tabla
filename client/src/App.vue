@@ -30,4 +30,17 @@
     }
   }
 }
+.material-design-icon.icon-2x {
+  height: 2em;
+  width: 2em;
+}
+
+.material-design-icon.icon-2x > .material-design-icon__svg {
+  height: 2em;
+  width: 2em;
+}
+
+.material-design-icon__svg {
+  bottom: 0 !important;
+}
 </style>

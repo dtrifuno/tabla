@@ -1,7 +1,7 @@
 
 <template>
   <modal
-    name="rename-table"
+    name="rename-column"
     transition="pop-out"
     :adaptive="adaptive"
     :height="height"
@@ -11,19 +11,19 @@
   >
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Rename table</div>
+        <div class="dialog-title">Rename column</div>
         <div class="dialog-c-text">
           <div class="form-group">
             <label for="title-form">
-              Enter a new title for the table
-              <b>{{this.tableName}}</b>:
+              Enter a new title for the column
+              <b>{{this.columnName}}</b>:
             </label>
             <input
               id="title-form"
               class="form-control"
-              v-model="newTableName"
+              v-model="newColumnName"
               placeholder="Title"
-              ref="renameTableInput"
+              ref="newColumnInput"
             />
           </div>
         </div>
@@ -40,38 +40,38 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'rename-table',
+  name: 'rename-column',
   data() {
     return {
-      newTableName: '',
-      tableName: '',
-      tableId: '',
+      newColumnName: '',
+      columnId: '',
+      columnName: '',
       adaptive: true,
       height: 'auto',
-      modal: 0,
     };
   },
   methods: {
-    ...mapActions(['renameCurrentTable', 'fetchTables']),
+    ...mapActions(['renameColumn']),
     closeModal() {
-      this.$modal.hide('rename-table');
+      this.$modal.hide('rename-column');
     },
     async renameClick() {
-      await this.renameCurrentTable(this.newTableName).then(() => {
-        this.fetchTables();
+      await this.renameColumn({
+        columnId: this.columnId,
+        name: this.newColumnName,
       });
-      this.$modal.hide('rename-table');
+      this.$modal.hide('rename-column');
     },
     beforeOpen(event) {
-      this.newTableName = event.params.tableName;
-      this.tableName = event.params.tableName;
-      this.tableId = event.params.tableId;
+      this.newColumnName = event.params.columnName;
+      this.columnName = event.params.columnName;
+      this.columnId = event.params.columnId;
     },
     onClose() {
-      this.newTableName = '';
+      this.newColumnName = '';
     },
     fixFocus() {
-      this.$refs.renameTableInput.focus();
+      this.$refs.newColumnInput.focus();
     },
   },
 };

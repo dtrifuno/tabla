@@ -1,62 +1,42 @@
 <template>
   <div class="about">
+    <rename-table />
     <add-column />
     <delete-column />
-    <rename-table />
+    <rename-column />
+    <add-entry />
     <div class="mx-auto">
-      <div @click="showRenameTableModal" class="title-box">
+      <div
+        @click="() => showRenameTableModal(this.$store.state.currentTable.id, this.$store.state.currentTable.name)"
+        class="title-box"
+      >
         <h3 class="title">{{this.$store.state.currentTable.name}}</h3>
         <pencil-icon class="title-edit-icon icon-2x" />
       </div>
     </div>
+    <div class="add-column-btn col-10 col-xl-3 mx-auto" @click="showAddColumnModal">Create Column</div>
     <ul class="columns">
-      <li>
-        <ul class="column">
-          <li class="column-header">Column 1 Heading</li>
-          <entry name="Second Title" />
-          <entry
-            name="Third title that is much longer than the previous two, and is perhaps a more realistic example of a description?"
-          />
-          <li class="column-add-entry">ADD NEW ENTRY</li>
-        </ul>
-      </li>
-      <li>
-        <ul class="column">
-          <li class="column-header">Column 2 Heading</li>
-          <li class="column-entry">
-            <div class="column-entry-title">First Title</div>
-          </li>
-          <li class="column-entry">
-            <div
-              class="column-entry-title"
-            >Finish this accursed project that is taking me way too long</div>
-          </li>
-          <li class="column-entry">Third Title</li>
-        </ul>
-      </li>
-      <li>
-        <ul class="column">
-          <li class="add-column" @click="showAddColumnModal">Create Column</li>
-        </ul>
-      </li>
       <ul
         v-for="column in this.$store.state.currentTable.columns"
         v-bind:key="column.id"
-        class="column"
+        class="column col-10 col-xl-3"
       >
         <li class="column-header">
-          <div class="edit-click-area">
+          <div class="edit-click-area" @click="() => showRenameColumnModal(column.id, column.name)">
             <div class="column-name">{{column.name}}</div>
             <pencil-icon class="icon" />
           </div>
-          <div class="delete-click-area">
+          <div
+            class="delete-click-area"
+            @click="() => showDeleteColumnModal(column.id, column.name)"
+          >
             <close-icon class="icon" />
           </div>
         </li>
-        <li>
-          <entry name="First Title" />
+        <li v-for="entry in column.entries" v-bind:key="entry.id">
+          <entry :name="entry.name" />
         </li>
-        <li class="column-add-entry">ADD NEW ENTRY</li>
+        <li class="column-add-entry" @click="() => showAddEntryModal(column.id)">Add New Entry</li>
       </ul>
     </ul>
   </div>
@@ -72,19 +52,47 @@
 .title {
   padding: 0;
   margin: 0.5rem 0.3rem 0 0;
+  user-select: none;
+}
+.add-column-btn {
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  cursor: pointer;
+  margin: 1rem;
+  user-select: none;
+}
+.add-column-btn:hover {
+  background: rgba(40, 167, 69, 0.2);
+}
+.add-column-btn:active {
+  background: rgba(40, 167, 69, 0.4);
 }
 .columns {
   list-style: none;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   padding: 0 0 0 0rem;
 }
 
 .column {
-  list-style: none;
   display: flex;
   flex-direction: column;
-  padding: 0 0 0 2rem;
+  padding: 1rem 1rem 0 1rem;
+  list-style: none;
+}
+
+@media (max-width: 1199px) {
+  .columns {
+    flex-direction: column;
+  }
+
+  .column {
+    padding: 0 0 1.5rem 0;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
 
 .column-header {
@@ -95,6 +103,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  overflow: hidden;
+  user-select: none;
 }
 
 .column-name {
@@ -113,8 +123,11 @@
   flex: 0 1 auto;
 }
 
+.edit-click-area:hover {
+  color: #28a745;
+}
 .edit-click-area:hover .icon {
-  color: green;
+  color: #28a745;
 }
 
 .delete-click-area {
@@ -136,6 +149,16 @@
 .column-add-entry {
   padding: 0.75rem 1.25rem;
   border: 1px solid rgba(0, 0, 0, 0.125);
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+.column-add-entry:hover {
+  background: rgba(40, 167, 69, 0.2);
+}
+.column-add-entry:active {
+  background: rgba(40, 167, 69, 0.4);
 }
 
 .column-entry-title {
@@ -145,10 +168,11 @@
 
 .title-box:hover {
   cursor: pointer;
+  color: #28a745;
 }
 
 .title-box:hover .title-edit-icon {
-  color: green;
+  color: #28a745;
 }
 </style>
 
@@ -158,27 +182,35 @@ import { mapActions } from 'vuex';
 import PencilIcon from 'vue-material-design-icons/Pencil.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
-import AddColumn from '../components/AddColumn.vue';
 import RenameTable from '../components/RenameTable.vue';
+import AddColumn from '../components/AddColumn.vue';
+import DeleteColumn from '../components/DeleteColumn.vue';
+import RenameColumn from '../components/RenameColumn.vue';
+import AddEntry from '../components/AddEntry.vue';
 import Entry from '../components/Entry.vue';
 
 export default {
   name: 'Table',
   components: {
-    AddColumn,
     RenameTable,
+    AddColumn,
+    DeleteColumn,
+    RenameColumn,
+    AddEntry,
     Entry,
     PencilIcon,
     CloseIcon,
   },
   methods: {
-    showAddColumnModal() {
-      this.$modal.show('add-column', {
+    showRenameTableModal(tableId, tableName) {
+      this.$modal.show('rename-table', {
         height: 'auto',
+        tableId,
+        tableName,
       });
     },
-    showRenameTableModal() {
-      this.$modal.show('rename-table', {
+    showAddColumnModal() {
+      this.$modal.show('add-column', {
         height: 'auto',
       });
     },
@@ -187,6 +219,19 @@ export default {
         height: 'auto',
         columnId,
         columnName,
+      });
+    },
+    showRenameColumnModal(columnId, columnName) {
+      this.$modal.show('rename-column', {
+        height: 'auto',
+        columnId,
+        columnName,
+      });
+    },
+    showAddEntryModal(columnId) {
+      this.$modal.show('add-entry', {
+        height: 'auto',
+        columnId,
       });
     },
   },

@@ -26,58 +26,6 @@
   </modal>
 </template>
 
-<style scoped>
-.dialog {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.dialog-content {
-  flex: 1 0 auto;
-  width: 100%;
-  padding: 15px;
-  font-size: 14px;
-}
-
-.dialog-buttons {
-  display: flex;
-  flex: 0 1 auto;
-  width: 100%;
-  border-top: 1px solid #eee;
-}
-
-.dialog-title {
-  font-weight: 600;
-  padding-bottom: 15px;
-}
-
-.dialog-button {
-  font-size: 12px !important;
-  background: transparent;
-  outline: none;
-  padding: 0;
-  margin: 0;
-  border: 0;
-
-  box-sizing: border-box;
-  line-height: 40px;
-  height: 40px;
-}
-
-.dialog-button:hover {
-  background: rgba(0, 0, 0, 0.01);
-}
-
-.dialog-button:active {
-  background: rgba(0, 0, 0, 0.025);
-}
-
-.dialog-button:not(:first-of-type) {
-  border-left: 1px solid #eee;
-}
-</style>
-
-
 <script>
 import { mapActions } from 'vuex';
 
@@ -85,9 +33,9 @@ export default {
   name: 'delete-column',
   data() {
     return {
-      tableName: '',
-      tableId: '',
       adaptive: true,
+      columnId: '',
+      columnName: '',
       height: 'auto',
       modal: 0,
     };

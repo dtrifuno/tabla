@@ -12,12 +12,16 @@ CORS(app, expose_headers='Authorization')
 api = Api(app)
 
 from tabla_server import models, resources, views
-api.add_resource(resources.UserRegistration, '/registration')
-api.add_resource(resources.UserLogin, '/login')
-api.add_resource(resources.Tables, '/tables')
-api.add_resource(resources.Table, '/table/<table_id>')
-api.add_resource(resources.PostTable, '/table')
-api.add_resource(resources.Column, '/column')
-api.add_resource(resources.DeleteColumn, '/column/<column_id>')
-api.add_resource(resources.Entry, '/entry')
-api.add_resource(resources.DeleteEntry, '/entry/<entry_id>')
+api.add_resource(resources.UserRegistration, '/api/register')
+api.add_resource(resources.UserLogin, '/api/login')
+
+api.add_resource(resources.Tables, '/api/tables')
+
+api.add_resource(resources.PostTable, '/api/table')
+api.add_resource(resources.Table, '/api/table/<table_id>')
+
+api.add_resource(resources.PostColumn, '/api/column')
+api.add_resource(resources.Column, '/api/column/<column_id>')
+
+api.add_resource(resources.PostEntry, '/api/entry')
+api.add_resource(resources.Entry, '/api/entry/<entry_id>')

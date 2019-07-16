@@ -25,7 +25,7 @@ user_parser.add_argument('password', required=True)
 class UserRegistration(Resource):
     def post(self):
         data = user_parser.parse_args()
-        print(f'got a post to /registration - {data}')
+        print(f'got a post to /register - {data}')
         user_exists = models.User.objects(email=data['email'])
         if user_exists:
             return {
@@ -56,7 +56,13 @@ class UserLogin(Resource):
             return {'message': 'invalid credentials'}, 401
 
         access_token = create_access_token(identity=data['email'])
-        return {'message': f'Logged in as {current_user.email}', 'access_token': access_token}
+        tables = models.Table.objects(owner=current_user)
+        table_sons = [table.header_to_client() for table in tables]
+        tables_json = JSONEncoder().encode(table_sons)
+        return {'message': f'Logged in as {current_user.email}',
+                'access_token': access_token,
+                'tables': tables_json
+                }
 
 
 class Tables(Resource):
@@ -65,32 +71,19 @@ class Tables(Resource):
         print(f'got a get to /tables')
         current_user = models.User.objects(email=get_jwt_identity()).first()
         tables = models.Table.objects(owner=current_user)
-        if tables:
-            return JSONEncoder().encode([table.header_to_client() for table in tables])
+        table_sons = [table.header_to_client() for table in tables]
+        print(table_sons, JSONEncoder().encode(table_sons))
+        if current_user:
+            return JSONEncoder().encode(table_sons)
         else:
             {}, 500
-
-    @jwt_required
-    def put(self):
-        print(f'got a get to /tables - {request.json}')
-        tables_request = request.json.get('tables', None)
-        if tables_request is None:
-            return {}, 500
-        table_ids = [x['id'] for x in tables_request]
-        tables = models.Table.objects(id__in=table_ids)
-        for table in tables:
-            new_order = next(x['order']
-                             for x in tables_request if x['id'] == str(table.id))
-            table.order = new_order
-            table.save()
-        return {}
 
 
 parser = reqparse.RequestParser()
 parser.add_argument('tableId')
 parser.add_argument('columnId')
 parser.add_argument('name')
-parser.add_argument('order', type=int)
+parser.add_argument('prev')
 
 
 class Table(Resource):
@@ -104,6 +97,22 @@ class Table(Resource):
         return JSONEncoder().encode(table.to_client())
 
     @jwt_required
+    def put(self, table_id):
+        data = parser.parse_args()
+        print(f'got a put to /table/{table_id} - {data}')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(
+            id=table_id, owner=current_user).first()
+        if table:
+            table.prev = None
+            if data['prev'] is not None:
+                table.prev = models.Table.objects(id=data['prev']).first()
+            table.name = data['name'][:150]
+            table.save()
+            return JSONEncoder().encode(table.to_client())
+        return {}, 500
+
+    @jwt_required
     def delete(self, table_id):
         print(f'got a delete to /table/{table_id}')
         current_user = models.User.objects(email=get_jwt_identity()).first()
@@ -115,20 +124,6 @@ class Table(Resource):
         else:
             return {}, 500
 
-    @jwt_required
-    def put(self, table_id):
-        data = parser.parse_args()
-        print(f'got a put to /table/{table_id} - {data}')
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        table = models.Table.objects(
-            id=table_id, owner=current_user).first()
-        if table:
-            table.order = data['order']
-            table.name = data['name']
-            table.save()
-            return JSONEncoder().encode(table.to_client())
-        return {}, 500
-
 
 class PostTable(Resource):
     @jwt_required
@@ -136,43 +131,34 @@ class PostTable(Resource):
         data = parser.parse_args()
         print(f'got a post to /table - {data}')
         current_user = models.User.objects(email=get_jwt_identity()).first()
-        if current_user is not None:
-            new_table = models.Table(
-                name=data['name'], order=data['order'], owner=current_user)
-            new_table.save()
-            return new_table.to_json()
-        else:
+        if current_user is None:
             return {}, 500
+        table = models.Table(
+            name=data['name'][:150], prev=data['prev'], owner=current_user)
+        table.save()
+        return JSONEncoder().encode(table.to_client())
 
 
 class Column(Resource):
     @jwt_required
-    def post(self):
+    def put(self, column_id):
         data = parser.parse_args()
-        print(f'got a post to /column - {data}')
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        table = models.Table.objects(
-            owner=current_user, id=data['tableId']).first()
-        if not table:
+        print(f'got a put to /column/{column_id}')
+        owner = models.User.objects(email=get_jwt_identity()).first()
+        column = models.Column.objects(id=column_id, owner=owner).first()
+        if column is None:
             return {}, 500
-        column = models.Column(name=data['name'], table=table)
+        column.name = data['name'][:150]
+        column.prev = None
+        if data['prev'] is not None:
+            column.prev = models.Column.objects(id=data['prev']).first()
         column.save()
         return JSONEncoder().encode(column.to_client())
 
     @jwt_required
-    def put(self):
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        return {
-            'answer': 42
-        }
-
-
-class DeleteColumn(Resource):
-    @jwt_required
     def delete(self, column_id):
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        column = models.Column.objects(
-            id=column_id, owner=current_user).first()
+        owner = models.User.objects(email=get_jwt_identity()).first()
+        column = models.Column.objects(id=column_id, owner=owner).first()
         if column:
             column.delete()
             return {}
@@ -180,23 +166,29 @@ class DeleteColumn(Resource):
             return {}, 500
 
 
-class Entry(Resource):
+class PostColumn(Resource):
     @jwt_required
     def post(self):
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        return {
-            'answer': 42
-        }
+        data = parser.parse_args()
+        print(f'got a post to /column - {data}')
+        owner = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(owner=owner, id=data['tableId']).first()
+        if not table:
+            return {}, 500
+        column = models.Column(
+            name=data['name'][:150], table=table, owner=owner, prev=prev)
+        column.save()
+        return JSONEncoder().encode(column.to_client())
 
+
+class Entry(Resource):
     @jwt_required
-    def put(self):
-        current_user = models.User.objects(email=get_jwt_identity()).first()
+    def put(self, entry_id):
+        owner = models.User.objects(email=get_jwt_identity()).first()
         return {
             'answer': 42
         }
 
-
-class DeleteEntry(Resource):
     @jwt_required
     def delete(self, entry_id):
         current_user = models.User.objects(email=get_jwt_identity()).first()
@@ -204,5 +196,23 @@ class DeleteEntry(Resource):
         if entry:
             entry.delete()
             return {}
+        else:
+            return {}, 500
+
+
+class PostEntry(Resource):
+    @jwt_required
+    def post(self):
+        data = parser.parse_args()
+        print(f'got a post to /entry - {data}')
+        current_user = models.User.objects(email=get_jwt_identity()).first()
+        column = models.Column.objects(
+            id=data['columnId'], owner=current_user).first()
+        if column is not None:
+            entry = models.Entry(
+                name=data['name'], prev=data['prev'], column=column, owner=current_user)
+            entry.save()
+            print(entry.to_client())
+            return JSONEncoder().encode(entry.to_client())
         else:
             return {}, 500

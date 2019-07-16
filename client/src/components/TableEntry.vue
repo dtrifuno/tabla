@@ -18,6 +18,7 @@
 .title {
   flex: 1 0 auto;
   line-height: 40px;
+  user-select: none;
 }
 
 .icon {

@@ -27,11 +27,16 @@
   padding: 0 0 0 0;
 }
 
+.list-group {
+  padding: 0;
+}
+
 .new-table-item {
   padding: 0.65rem 1.25rem;
   font-weight: 600;
   border: 1px solid rgba(0, 0, 0, 0.125);
   cursor: pointer;
+  user-select: none;
 }
 
 .table-list .table-item {
@@ -44,11 +49,12 @@
 
 .table-item:hover,
 .new-table-item:hover {
-  background: rgba(0, 0, 0, 0.01);
+  background: rgba(40, 167, 69, 0.2);
 }
 
-.table-item:active {
-  background: rgba(0, 0, 0, 0.025);
+.table-item:active,
+.new-table-item:active {
+  background: rgba(40, 167, 69, 0.4);
 }
 </style>
 
@@ -89,7 +95,7 @@ export default {
       });
     },
     async titleClick(id) {
-      await this.setCurrentTable(id);
+      await this.setCurrentTable(id).then(() => this.$router.push({ path: '/table' }),);
     },
     deleteClick(id, name) {
       this.$modal.show('delete-table', {

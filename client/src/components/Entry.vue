@@ -3,7 +3,6 @@
     <div class="edit-click">
       <drag-variant-icon class="icon" />
       <div @click="onClickTitle" class="title">{{ this.name }}</div>
-      <pencil-icon class="edit-icon icon" />
     </div>
     <div class="delete-click">
       <close-icon class="delete-icon icon" />
@@ -19,6 +18,14 @@
   flex-direction: row;
   border: 0.5px solid rgba(0, 0, 0, 0.125);
   padding: 0.25rem 0.25rem;
+}
+
+.container:hover {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.container:active {
+  background-color: rgba(0, 0, 0, 0.025);
 }
 
 .title {
@@ -49,24 +56,18 @@
 }
 
 .edit-click:hover .edit-icon {
-  color: green;
-}
-
-.icon:hover {
-  color: brown;
+  color: #28a745;
 }
 </style>
 
 <script>
 import CloseIcon from 'vue-material-design-icons/Close.vue';
-import PencilIcon from 'vue-material-design-icons/Pencil.vue';
 import DragVariantIcon from 'vue-material-design-icons/DragVariant.vue';
 
 export default {
   name: 'entry',
   components: {
     CloseIcon,
-    PencilIcon,
     DragVariantIcon,
   },
   props: ['name', 'id', 'onClickTitle', 'onClickDelete'],

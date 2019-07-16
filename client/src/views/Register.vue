@@ -24,15 +24,23 @@
           placeholder="Password"
         />
       </div>
-      <button type="button" v-on:click="click_register" class="btn btn-primary form-group">Sign Up</button>
+      <button type="button" v-on:click="click_register" class="btn btn-success form-group">Sign Up</button>
     </form>
     <br />
     <p>
       Already a user?
-      <a href="/">Please login instead</a>.
+      <a href="/" class="text-success">Please login instead</a>.
     </p>
   </div>
 </template>
+
+<style scoped>
+h4,
+label {
+  user-select: none;
+}
+</style>
+
 
 <script>
 import { registerUser } from '../api';

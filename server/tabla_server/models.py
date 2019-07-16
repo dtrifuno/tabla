@@ -2,18 +2,23 @@ from tabla_server import db
 
 
 class User(db.Document):
-    email = db.StringField(required=True, unique=True)
+    email = db.StringField(required=True, unique=True, max_length=50)
     password = db.StringField(required=True)
 
 
 class Table(db.Document):
-    name = db.StringField(required=True)
-    order = db.IntField()
-    owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
+    name = db.StringField(required=True, max_length=150)
+    prev = db.ReferenceField('self', required=False)
+    owner = db.ReferenceField(
+        User, required=True, reverse_delete_rule=db.CASCADE)
 
     def header_to_client(self):
         son = self.to_mongo()
         son['id'] = str(son['_id'])
+        if son.get('prev', None) is not None:
+            son['prev'] = str(son['prev'])
+        else:
+            son['prev'] = None
         son.pop('_id', None)
         son.pop('owner', None)
         return son
@@ -21,6 +26,10 @@ class Table(db.Document):
     def to_client(self):
         son = self.to_mongo()
         son['id'] = str(son['_id'])
+        if son.get('prev', None) is not None:
+            son['prev'] = str(son['prev'])
+        else:
+            son['prev'] = None
         son['columns'] = []
         son.pop('_id', None)
         son.pop('owner', None)

@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const url = '/api';
+
 // /login
 function login(email, password) {
-  return axios.post('http://localhost:5000/login', {
+  return axios.post(`${url}/login`, {
     email,
     password,
   });
@@ -10,7 +12,7 @@ function login(email, password) {
 
 // /registration
 function registerUser(email, password) {
-  return axios.post('http://localhost:5000/registration', {
+  return axios.post(`${url}/register`, {
     email,
     password,
   });
@@ -18,30 +20,19 @@ function registerUser(email, password) {
 
 // /tables
 function getTables(token) {
-  return axios.get('http://localhost:5000/tables', {
+  return axios.get(`${url}/tables`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
-function putTables(token, tables) {
-  return axios.put(
-    'http://localhost:5000/tables',
-    {
-      tables,
-    },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-}
-
 // /table
-function postTable(token, name, order) {
+function postTable(token, name, prev) {
+  console.log(token, name, prev);
   return axios.post(
-    'http://localhost:5000/table',
+    `${url}/table`,
     {
       name,
-      order,
+      prev,
     },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -51,7 +42,7 @@ function postTable(token, name, order) {
 
 function putTable(token, table) {
   return axios.put(
-    `http://localhost:5000/table/${table.id}`,
+    `${url}/table/${table.id}`,
     {
       ...table,
     },
@@ -62,17 +53,13 @@ function putTable(token, table) {
 }
 
 function deleteTable(token, tableId) {
-  return axios.delete(
-    `http://localhost:5000/table/${tableId}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-    { tableId },
-  );
+  return axios.delete(`${url}/table/${tableId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 function getTable(token, tableId) {
-  return axios.get(`http://localhost:5000/table/${tableId}`, {
+  return axios.get(`${url}/table/${tableId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -80,12 +67,40 @@ function getTable(token, tableId) {
 // /column
 function postColumn(token, tableId, name, order) {
   return axios.post(
-    'http://localhost:5000/column',
+    `${url}/column`,
     {
       tableId,
       name,
       order,
     },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+}
+
+function putColumn(token, columnId, name) {
+  return axios.put(
+    `${url}/column/${columnId}`,
+    {
+      name,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+}
+
+function deleteColumn(token, columnId) {
+  return axios.delete(`${url}/column/${columnId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+function postEntry(token, columnId, name, order) {
+  return axios.post(
+    `${url}/entry`,
+    { columnId, name, order },
     {
       headers: { Authorization: `Bearer ${token}` },
     },
@@ -98,8 +113,10 @@ export {
   postTable,
   deleteTable,
   getTables,
-  putTables,
   getTable,
   putTable,
   postColumn,
+  putColumn,
+  deleteColumn,
+  postEntry,
 };

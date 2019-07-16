@@ -45,7 +45,6 @@ h4 {
 import { mapActions } from 'vuex';
 
 import { login } from '../api';
-import { fixId } from '../util';
 
 export default {
   name: 'home',

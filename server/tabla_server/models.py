@@ -41,15 +41,19 @@ class Table(db.Document):
 
 class Column(db.Document):
     name = db.StringField(required=True)
-    order = db.IntField()
+    prev = db.ReferenceField('self', required=False)
     table = db.ReferenceField(Table, reverse_delete_rule=db.CASCADE)
     owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
 
     def to_client(self):
         son = self.to_mongo()
         son['id'] = str(son['_id'])
-        son['entries'] = []
         son.pop('_id', None)
+        if son.get('prev', None) is not None:
+            son['prev'] = str(son['prev'])
+        else:
+            son['prev'] = None
+        son['entries'] = []
         son.pop('owner', None)
         son.pop('table', None)
         entries = Entry.objects(column=self)
@@ -60,7 +64,7 @@ class Column(db.Document):
 
 class Entry(db.Document):
     name = db.StringField()
-    order = db.IntField()
+    prev = db.ReferenceField('self', required=False)
     column = db.ReferenceField(Column, reverse_delete_rule=db.CASCADE)
     owner = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
 
@@ -68,6 +72,10 @@ class Entry(db.Document):
         son = self.to_mongo()
         son['id'] = str(son['_id'])
         son.pop('_id', None)
+        if son.get('prev', None) is not None:
+            son['prev'] = str(son['prev'])
+        else:
+            son['prev'] = None
         son.pop('owner', None)
         son.pop('column', None)
         return son

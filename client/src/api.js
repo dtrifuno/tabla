@@ -27,7 +27,6 @@ function getTables(token) {
 
 // /table
 function postTable(token, name, prev) {
-  console.log(token, name, prev);
   return axios.post(
     `${url}/table`,
     {
@@ -65,13 +64,13 @@ function getTable(token, tableId) {
 }
 
 // /column
-function postColumn(token, tableId, name, order) {
+function postColumn(token, tableId, name, prev) {
   return axios.post(
     `${url}/column`,
     {
       tableId,
       name,
-      order,
+      prev,
     },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -79,11 +78,11 @@ function postColumn(token, tableId, name, order) {
   );
 }
 
-function putColumn(token, columnId, name) {
+function putColumn(token, column) {
   return axios.put(
-    `${url}/column/${columnId}`,
+    `${url}/column/${column.id}`,
     {
-      name,
+      ...column,
     },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -96,6 +95,8 @@ function deleteColumn(token, columnId) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+// TODO
 
 function postEntry(token, columnId, name, order) {
   return axios.post(

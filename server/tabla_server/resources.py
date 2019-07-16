@@ -176,9 +176,11 @@ class PostColumn(Resource):
         if not table:
             return {}, 500
         column = models.Column(
-            name=data['name'][:150], table=table, owner=owner, prev=prev)
+            name=data['name'][:150], table=table, owner=owner, prev=data['prev'])
         column.save()
         return JSONEncoder().encode(column.to_client())
+
+# TODO
 
 
 class Entry(Resource):

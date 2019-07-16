@@ -1,5 +1,7 @@
 <template>
   <div>
+    <h4>Tables</h4>
+    <br />
     <add-table />
     <delete-table />
     <div class="list-group col-10 col-lg-3 mx-auto">
@@ -63,10 +65,9 @@
 import { mapActions } from 'vuex';
 import draggable from 'vuedraggable';
 
-import { getTable } from '../api';
+import AddTable from '../components/modals/AddTable';
+import DeleteTable from '../components/modals/DeleteTable';
 
-import AddTable from '../components/AddTable';
-import DeleteTable from '../components/DeleteTable';
 import TableEntry from '../components/TableEntry';
 
 export default {

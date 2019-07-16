@@ -1,14 +1,27 @@
 <template>
   <div id="app">
-    <div class="header">
-      <h1 class="display-3">Tabla</h1>
+    <div class="navbar navbar-expand navbar-light fixed-top header p-1">
+      <div class="container">
+        <div class="navbar-brand pl-2">Tabla</div>
+        <ul class="navbar-nav ml-auto">
+          <li v-if="this.$store.state.token" class="nav-item">
+            <router-link to="/tables" class="nav-link">Home</router-link>
+          </li>
+          <li v-if="this.$store.state.token" class="nav-item">
+            <div class="nav-link" style="cursor: pointer" @click="logout">Logout</div>
+          </li>
+          <li v-if="!this.$store.state.token" class="nav-item">
+            <router-link to="/" class="nav-link">Login</router-link>
+          </li>
+          <li v-if="!this.$store.state.token" class="nav-item">
+            <router-link to="/register" class="nav-link">Register</router-link>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div id="nav">
-      <router-link to="/">Login</router-link>|
-      <router-link to="/register">Register</router-link>|
-      <router-link to="/table">Table</router-link>|
-      <router-link to="/tables">Tables</router-link>
-    </div>
+    <br />
+    <br />
+    <br />
     <router-view />
   </div>
 </template>
@@ -22,24 +35,12 @@
 }
 
 .header {
-  background-color: #28a745;
+  display: flex;
+  flex-direction: row;
+  border-bottom: 2px solid #28a745;
+  background-color: white;
   color: white;
   user-select: none;
-}
-
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #42b983;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
-
-a {
-  color: #42b983;
 }
 
 .dialog {
@@ -109,3 +110,18 @@ a {
   bottom: 0 !important;
 }
 </style>
+
+<script>
+import { mapMutations } from 'vuex';
+
+export default {
+  methods: {
+    ...mapMutations(['setToken', 'setCurrentTable']),
+    logout() {
+      this.setToken('');
+      this.setCurrentTable({});
+      this.$router.push({ path: '/' });
+    },
+  },
+};
+</script>

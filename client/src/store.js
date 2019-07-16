@@ -39,8 +39,12 @@ const mutations = {
   addColumn(state, column) {
     state.currentTable.columns.push(column);
   },
+  setColumns(state, columns) {
+    state.currentTable.columns = columns;
+  },
   removeColumn(state, columnId) {
-    state.currentTable.columns = state.currentTable.columns.filter(x => x.id !== columnId);
+    const { currentTable } = state;
+    currentTable.columns = currentTable.columns.filter(x => x.id !== columnId);
   },
   editColumn(state, newColumn) {
     const { id } = newColumn;
@@ -61,7 +65,6 @@ const actions = {
   },
   async fetchTables({ commit, state }) {
     await getTables(state.token).then((response) => {
-      console.log(response);
       const tables = JSON.parse(response.data);
       const sortedTables = sortByPrev(tables);
       commit('setTables', sortedTables);
@@ -81,13 +84,10 @@ const actions = {
   },
   async createTable({ commit, state }, title) {
     const prev = state.tables.length ? state.tables.slice(-1)[0].id : null;
-    await postTable(state.token, title, prev)
-      .then((response) => {
-        console.log(response.data);
-        const table = JSON.parse(response.data);
-        commit('setTables', state.tables.concat(table));
-      })
-      .catch(err => console.log(err));
+    await postTable(state.token, title, prev).then((response) => {
+      const table = JSON.parse(response.data);
+      commit('setTables', state.tables.concat(table));
+    });
   },
   async removeTable({ commit, state, dispatch }, tableId) {
     await deleteTable(state.token, tableId)
@@ -104,17 +104,32 @@ const actions = {
   },
   async createColumn({ commit, state }, name) {
     const tableId = state.currentTable.id;
-    const order = state.currentTable.columns.length;
-    await postColumn(state.token, tableId, name, order).then((response) => {
+    const { columns } = state.currentTable;
+    console.log(columns);
+    const prev = columns.length ? columns.slice(-1)[0].id : null;
+    await postColumn(state.token, tableId, name, prev).then((response) => {
       const column = JSON.parse(response.data);
       commit('addColumn', { ...column, entries: [] });
     });
   },
-  async removeColumn({ commit, state }, columnId) {
-    await deleteColumn(state.token, columnId).then((response) => {
-      commit('removeColumn', columnId);
-    });
+  async reorderColumns({ state, commit }, columns) {
+    const newColumns = prevFromOrder(columns);
+    const columnsToPut = [];
+    for (let i = 0; i < columns.length; i += 1) {
+      if (columns[i].prev !== newColumns[i].prev) {
+        columnsToPut.push(newColumns[i]);
+      }
+    }
+    promiseForEach(columnsToPut, column => putColumn(state.token, column)).then(
+      commit('setColumns', newColumns),
+    );
   },
+  async removeColumn({ commit, dispatch, state }, columnId) {
+    await deleteColumn(state.token, columnId)
+      .then(commit('removeColumn', columnId))
+      .then(dispatch('reorderColumns', state.currentTable.columns));
+  },
+  // HERE
   async renameColumn({ commit, state }, { columnId, name }) {
     await putColumn(state.token, columnId, name).then((response) => {
       const newColumn = JSON.parse(response.data);
@@ -133,6 +148,7 @@ const actions = {
   async setCurrentTable({ commit, state }, tableId) {
     await getTable(state.token, tableId).then((response) => {
       const table = JSON.parse(response.data);
+      table.columns = sortByPrev(table.columns);
       commit('setCurrentTable', table);
     });
   },

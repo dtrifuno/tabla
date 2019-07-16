@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="add-column-btn col-10 col-xl-3 mx-auto" @click="showAddColumnModal">Create Column</div>
-    <ul class="columns">
+    <draggable v-model="columns" class="columns">
       <ul
         v-for="column in this.$store.state.currentTable.columns"
         v-bind:key="column.id"
@@ -38,7 +38,7 @@
         </li>
         <li class="column-add-entry" @click="() => showAddEntryModal(column.id)">Add New Entry</li>
       </ul>
-    </ul>
+    </draggable>
   </div>
 </template>
 
@@ -179,14 +179,16 @@
 
 <script>
 import { mapActions } from 'vuex';
+import draggable from 'vuedraggable';
+
 import PencilIcon from 'vue-material-design-icons/Pencil.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 
-import RenameTable from '../components/RenameTable.vue';
-import AddColumn from '../components/AddColumn.vue';
-import DeleteColumn from '../components/DeleteColumn.vue';
-import RenameColumn from '../components/RenameColumn.vue';
-import AddEntry from '../components/AddEntry.vue';
+import RenameTable from '../components/modals/RenameTable.vue';
+import AddColumn from '../components/modals/AddColumn.vue';
+import DeleteColumn from '../components/modals/DeleteColumn.vue';
+import RenameColumn from '../components/modals/RenameColumn.vue';
+import AddEntry from '../components/modals/AddEntry.vue';
 import Entry from '../components/Entry.vue';
 
 export default {
@@ -198,10 +200,22 @@ export default {
     RenameColumn,
     AddEntry,
     Entry,
+    draggable,
     PencilIcon,
     CloseIcon,
   },
+  computed: {
+    columns: {
+      get() {
+        return this.$store.state.currentTable.columns;
+      },
+      set(value) {
+        this.reorderColumns(value);
+      },
+    },
+  },
   methods: {
+    ...mapActions(['reorderColumns']),
     showRenameTableModal(tableId, tableName) {
       this.$modal.show('rename-table', {
         height: 'auto',

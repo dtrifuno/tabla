@@ -29,7 +29,7 @@
     <br />
     <p>
       Already a user?
-      <a href="/" class="text-success">Please login instead</a>.
+      <router-link to="/" class="text-success">Please login instead</router-link>.
     </p>
   </div>
 </template>

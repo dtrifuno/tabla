@@ -28,7 +28,7 @@
     <br />
     <p>
       Don't have an account?
-      <a href="/register" class="text-success">Register for one</a>.
+      <router-link to="/register" class="text-success">Register for one</router-link>.
     </p>
   </div>
 </template>

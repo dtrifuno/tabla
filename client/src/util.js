@@ -1,3 +1,27 @@
+/**
+ * Returns a string of length or fewer characters. If the given stringer is
+ * longer than length, it truncates and adds an ellipsis at the end.
+ *
+ * @param {string} str Input string
+ * @param {number} length Max length of output string
+ *
+ * @return {string} String with length or fewer characters
+ */
+function shorten(str, length) {
+  if (str.length <= length) {
+    return str;
+  }
+  return `${str.slice(0, length - 3)}...`;
+}
+
+/**
+ * Sorts an array of objects like a linked list by using the id and prev
+ * properties.
+ *
+ * @param {Object[]} arr Array of objects that have prev and id properties
+ *
+ * @return {Object[]} A sorted deep copy of the array.
+ */
 function sortByPrev(arr) {
   const n = arr.length;
   const copy = JSON.parse(JSON.stringify(arr));
@@ -22,6 +46,14 @@ function sortByPrev(arr) {
   return copy;
 }
 
+/**
+ * Returns a copy of an array of objects with an id property, setting
+ * arr[i].prev = arr[i-1].id.
+ *
+ * @param {Object[]} arr An array of objects.
+ *
+ * @return {Object[]} A deep copy of the array with fixed prev properties.
+ */
 function prevFromOrder(arr) {
   const n = arr.length;
   if (n === 0) {
@@ -36,8 +68,25 @@ function prevFromOrder(arr) {
   return copy;
 }
 
-async function promiseForEach(arr, fn) {
-  for (const item of arr) await fn(item);
+/**
+ * Returns an array of objects of newArr with different prev property
+ * from those of oldArr (i.e. objects whose prev we need to update in the DB).
+ *
+ * @param {Object[]} arr The original array
+ * @param {Object[]} newArr The new array
+ *
+ * @return {Object[]} Array of objects where prev differs between the two arrays
+ */
+function badPrevs(arr, newArr) {
+  const objsToPut = [];
+  for (let i = 0; i < arr.length; i += 1) {
+    if (arr[i].prev !== newArr[i].prev) {
+      objsToPut.push(newArr[i]);
+    }
+  }
+  return objsToPut;
 }
 
-export { sortByPrev, prevFromOrder, promiseForEach };
+export {
+ sortByPrev, prevFromOrder, badPrevs, shorten 
+};

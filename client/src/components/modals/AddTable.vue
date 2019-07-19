@@ -3,6 +3,7 @@
   <modal
     name="add-table"
     transition="pop-out"
+    :clickToClose="false"
     :adaptive="adaptive"
     :height="height"
     @opened="fixFocus"

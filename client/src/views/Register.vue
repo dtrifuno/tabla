@@ -3,7 +3,7 @@
     <h4>Create an account</h4>
     <br />
     <v-dialog />
-    <form class="mx-auto col-10 col-lg-2">
+    <form class="mx-auto col-10 col-lg-2" v-on:submit.prevent>
       <div class="form-group">
         <label for="email">Email</label>
         <input
@@ -11,7 +11,8 @@
           v-model="email"
           class="form-control"
           id="email"
-          placeholder="Enter email."
+          placeholder="Email"
+          @keyup.enter="triggerSignup"
         />
       </div>
       <div class="form-group">
@@ -22,9 +23,15 @@
           class="form-control"
           id="password"
           placeholder="Password"
+          @keyup.enter="triggerSignup"
         />
       </div>
-      <button type="button" v-on:click="click_register" class="btn btn-success form-group">Sign Up</button>
+      <button
+        type="button"
+        v-on:click="clickRegister"
+        class="btn btn-success form-group"
+        ref="signUpButton"
+      >Sign Up</button>
     </form>
     <br />
     <p>
@@ -43,6 +50,7 @@ label {
 
 
 <script>
+import validator from 'validator';
 import { registerUser } from '../api';
 
 export default {
@@ -55,9 +63,12 @@ export default {
     };
   },
   methods: {
-    account_created_modal() {
+    triggerSignup() {
+      this.$refs.signUpButton.click();
+    },
+    accountCreatedModal() {
       this.$modal.show('dialog', {
-        title: 'Account Created',
+        title: 'Account created',
         text: 'Account successfully created. Please login to continue.',
         buttons: [
           {
@@ -70,21 +81,41 @@ export default {
         ],
       });
     },
-    account_exists_modal() {
+    accountExistsModal() {
       this.$modal.show('dialog', {
-        title: 'Account Exists',
+        title: 'Account already exists',
         text:
           'There already is an account associated to that email. Did you mean to login instead?',
       });
     },
-    async click_register() {
-      await registerUser(this.email, this.password)
-        .then(() => {
-          this.account_created_modal();
-        })
-        .catch(() => {
-          this.account_exists_modal();
-        });
+    invalidEmailModal() {
+      this.$modal.show('dialog', {
+        title: 'Invalid email',
+        text:
+          'You have entered an invalid email. Please check the email field for mistakes.',
+      });
+    },
+    invalidPasswordModal() {
+      this.$modal.show('dialog', {
+        title: 'Invalid password',
+        text:
+          'The password you entered is too short. Please choose a password that is at least six characters.',
+      });
+    },
+    async clickRegister() {
+      if (!validator.isEmail(this.email)) {
+        this.invalidEmailModal();
+      } else if (this.password.length < 6) {
+        this.invalidPasswordModal();
+      } else {
+        await registerUser(this.email, this.password)
+          .then(() => {
+            this.accountCreatedModal();
+          })
+          .catch(() => {
+            this.accountExistsModal();
+          });
+      }
     },
   },
 };

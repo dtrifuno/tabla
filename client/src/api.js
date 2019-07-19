@@ -96,28 +96,48 @@ function deleteColumn(token, columnId) {
   });
 }
 
-// TODO
-
-function postEntry(token, columnId, name, order) {
+// /entry
+function postEntry(token, columnId, name, prev) {
   return axios.post(
     `${url}/entry`,
-    { columnId, name, order },
+    { columnId, name, prev },
     {
       headers: { Authorization: `Bearer ${token}` },
     },
   );
 }
 
+function putEntry(token, columnId, entry) {
+  return axios.put(
+    `${url}/entry/${entry.id}`,
+    {
+      ...entry,
+      columnId,
+    },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+}
+
+function deleteEntry(token, entryId) {
+  return axios.delete(`${url}/entry/${entryId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export {
   login,
   registerUser,
-  postTable,
-  deleteTable,
   getTables,
+  postTable,
   getTable,
   putTable,
+  deleteTable,
   postColumn,
   putColumn,
   deleteColumn,
   postEntry,
+  putEntry,
+  deleteEntry,
 };

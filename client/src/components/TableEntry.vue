@@ -1,14 +1,15 @@
 <template>
   <div class="container">
-    <div @click="onClickTitle" class="title">{{ this.name }}</div>
+    <div @click="onClickTitle" class="title">{{ shortTitle }}</div>
     <div @click="onClickDelete" class="icon">
       <close-icon />
     </div>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .container {
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-content: center;
@@ -24,20 +25,26 @@
 .icon {
   flex: 0 1 auto;
   display: flex;
-}
 
-.icon:hover {
-  color: brown;
+  &:hover {
+    color: brown;
+  }
 }
 </style>
 
 <script>
 import CloseIcon from 'vue-material-design-icons/Close.vue';
+import { shorten } from '../util';
 
 export default {
   name: 'table-entry',
   components: {
     CloseIcon,
+  },
+  computed: {
+    shortTitle() {
+      return shorten(this.name, 31);
+    },
   },
   props: ['name', 'id', 'onClickTitle', 'onClickDelete'],
 };

@@ -1,8 +1,9 @@
 <template>
   <div>
+    <v-dialog />
     <h4>Login</h4>
     <br />
-    <form class="mx-auto col-10 col-lg-2">
+    <form class="mx-auto col-10 col-lg-2" v-on:submit.prevent>
       <div class="form-group">
         <label for="email">Email</label>
         <input
@@ -10,7 +11,8 @@
           v-model="email"
           class="form-control"
           id="email"
-          placeholder="Enter email."
+          placeholder="Email"
+          @keyup.enter="triggerLogin"
         />
       </div>
       <div class="form-group">
@@ -21,9 +23,15 @@
           class="form-control"
           id="password"
           placeholder="Password"
+          @keyup.enter="triggerLogin"
         />
       </div>
-      <button type="button" @click="click_login" class="btn btn-success form-group">Login</button>
+      <button
+        type="button"
+        @click="clickLogin"
+        class="btn btn-success form-group"
+        ref="loginButton"
+      >Login</button>
     </form>
     <br />
     <p>
@@ -56,14 +64,28 @@ export default {
   },
   methods: {
     ...mapActions(['setToken', 'fetchTables']),
-    async click_login() {
+    triggerLogin() {
+      this.$refs.loginButton.click();
+    },
+    invalidCredentialsModal() {
+      this.$modal.show('dialog', {
+        title: 'Invalid credentials',
+        text:
+          'Invalid login credentials. Please re-enter your email and password.',
+      });
+    },
+    async clickLogin() {
       await login(this.email, this.password)
         .then((response) => {
           this.setToken(response.data.access_token);
-          console.log('logged in');
           this.fetchTables();
         })
-        .then(() => this.$router.push({ path: '/tables' }));
+        .then(() => this.$router.push({ path: '/tables' }))
+        .catch(() => {
+          this.email = '';
+          this.password = '';
+          this.invalidCredentialsModal();
+        });
     },
   },
 };

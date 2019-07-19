@@ -1,4 +1,5 @@
 import json
+import datetime
 from bson import ObjectId
 
 from flask import request
@@ -48,14 +49,14 @@ class UserLogin(Resource):
         data = user_parser.parse_args()
         print(f'got a post to /login - {data}')
         current_user = models.User.objects(email=data['email']).first()
-        print(current_user, type(current_user))
         if current_user is not None:
             validated = pbkdf2_sha256.verify(data['password'],
                                              current_user.password)
         if current_user is None or not validated:
-            return {'message': 'invalid credentials'}, 401
+            return {'message': 'invalid credentials'}, 500
 
-        access_token = create_access_token(identity=data['email'])
+        access_token = create_access_token(
+            identity=data['email'], expires_delta=datetime.timedelta(minutes=60))
         tables = models.Table.objects(owner=current_user)
         table_sons = [table.header_to_client() for table in tables]
         tables_json = JSONEncoder().encode(table_sons)
@@ -186,13 +187,26 @@ class PostColumn(Resource):
 class Entry(Resource):
     @jwt_required
     def put(self, entry_id):
+        data = parser.parse_args()
+        print(f'got a put to /entry/{entry_id}')
         owner = models.User.objects(email=get_jwt_identity()).first()
-        return {
-            'answer': 42
-        }
+        entry = models.Entry.objects(id=entry_id).first()
+        if entry is not None:
+            entry.name = data['name']
+            entry.prev = None
+            if data['prev'] is not None:
+                entry.prev = models.Entry.objects(id=data['prev']).first()
+            column = models.Column.objects(
+                id=data['columnId'], owner=owner).first()
+            entry.column = column
+            entry.save()
+            return JSONEncoder().encode(entry.to_client())
+        else:
+            return {}, 500
 
     @jwt_required
     def delete(self, entry_id):
+        print(f'got a delete to /entry/{entry_id}')
         current_user = models.User.objects(email=get_jwt_identity()).first()
         entry = models.Entry.objects(id=entry_id, owner=current_user).first()
         if entry:

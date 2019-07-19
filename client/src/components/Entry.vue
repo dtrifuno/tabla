@@ -2,30 +2,31 @@
   <div class="container">
     <div class="edit-click">
       <drag-variant-icon class="icon" />
-      <div @click="onClickTitle" class="title">{{ this.name }}</div>
+      <div class="title">{{ this.name }}</div>
     </div>
-    <div class="delete-click">
+    <div class="delete-click" @click="this.onClickDelete">
       <close-icon class="delete-icon icon" />
     </div>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .container {
   display: flex;
-  max-width: 20vw;
+  background-color: white;
   min-height: 2.5rem;
+  width: 100%;
   flex-direction: row;
   border: 0.5px solid rgba(0, 0, 0, 0.125);
-  padding: 0.25rem 0.25rem;
-}
+  padding: 0.5rem 0.35rem;
 
-.container:hover {
-  background-color: rgba(0, 0, 0, 0.01);
-}
+  &:hover {
+    background-color: rgb(252, 252, 252);
+  }
 
-.container:active {
-  background-color: rgba(0, 0, 0, 0.025);
+  &:active {
+    background-color: rgb(248, 248, 248);
+  }
 }
 
 .title {
@@ -40,10 +41,10 @@
   display: flex;
   align-content: center;
   cursor: pointer;
-}
 
-.delete-click:hover .delete-icon {
-  color: brown;
+  &:hover .delete-icon {
+    color: brown;
+  }
 }
 
 .edit-click {
@@ -53,10 +54,10 @@
   flex: 1 0 auto;
   width: 90%;
   cursor: pointer;
-}
 
-.edit-click:hover .edit-icon {
-  color: #28a745;
+  &:hover .edit-icon {
+    color: #28a745;
+  }
 }
 </style>
 

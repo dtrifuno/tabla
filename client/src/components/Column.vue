@@ -1,27 +1,44 @@
 <template>
   <div>
-    <rename-column />
-    <delete-column />
-    <add-entry />
     <ul class="column">
       <li class="column-header">
-        <div class="edit-click-area" @click="() => showRenameColumnModal(id, title)">
-          <div class="column-name">{{ title }}</div>
+        <div class="edit-click-area" @click="() => showRenameColumnModal(column)">
+          <div class="column-name">{{ shortTitle }}</div>
           <pencil-icon class="icon" />
         </div>
-        <div class="delete-click-area" @click="() => showDeleteColumnModal(id, title)">
+        <div class="delete-click-area" @click="() => showDeleteColumnModal(column)">
           <close-icon class="icon" />
         </div>
       </li>
-      <li class="column-add-entry" @click="() => showAddEntryModal(id)">Add New Entry</li>
+      <li>
+        <draggable v-model="entries" group="entries">
+          <transition-group type="transition" name="flip-list" class="draggable-area">
+            <entry
+              v-for="entry in entries"
+              :name="entry.name"
+              v-bind:key="entry.id"
+              :onClickDelete="() => showDeleteEntryModal(column.id, entry)"
+            />
+          </transition-group>
+        </draggable>
+      </li>
+      <li class="column-add-entry" @click="() => showAddEntryModal(column.id)">Add New Entry</li>
     </ul>
   </div>
-  <!--<li v-for="entry in column.entries" v-bind:key="entry.id">
-        <entry :name="entry.name" />
-  </li>-->
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+.flip-list-move {
+  transition: transform 0.5s;
+}
+.flip-list-enter-active,
+.flip-list-leave-active {
+  transition: opacity 0.5s;
+}
+.flip-list-enter,
+.flip-list-leave-to {
+  opacity: 0;
+}
 .column {
   list-style: none;
   width: 100%;
@@ -46,34 +63,34 @@
   flex: 1 0 auto;
 }
 
+.icon {
+  flex: 0 1 auto;
+}
+
 .edit-click-area {
   display: flex;
   flex-direction: row;
   align-items: center;
   flex: 1 0 auto;
   cursor: pointer;
-}
 
-.icon {
-  flex: 0 1 auto;
-}
+  &:hover {
+    color: #28a745;
+  }
 
-.edit-click-area:hover {
-  color: #28a745;
-}
-
-.edit-click-area:hover .icon {
-  color: #28a745;
+  &:hover .icon {
+    color: #28a745;
+  }
 }
 
 .delete-click-area {
   display: flex;
   align-content: center;
   cursor: pointer;
-}
 
-.delete-click-area:hover .icon {
-  color: brown;
+  &:hover .icon {
+    color: brown;
+  }
 }
 
 .column-add-entry {
@@ -82,14 +99,20 @@
   cursor: pointer;
   font-weight: 600;
   user-select: none;
+
+  &:hover {
+    background: rgba(40, 167, 69, 0.2);
+  }
+
+  &:active {
+    background: rgba(40, 167, 69, 0.4);
+  }
 }
 
-.column-add-entry:hover {
-  background: rgba(40, 167, 69, 0.2);
-}
-
-.column-add-entry:active {
-  background: rgba(40, 167, 69, 0.4);
+.draggable-area {
+  display: block;
+  min-height: 0.01px;
+  width: 100%;
 }
 </style>
 
@@ -99,41 +122,62 @@ import draggable from 'vuedraggable';
 
 import PencilIcon from 'vue-material-design-icons/Pencil.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
+import { shorten } from '../util';
 
 import Entry from './Entry.vue';
-import DeleteColumn from './modals/DeleteColumn.vue';
-import RenameColumn from './modals/RenameColumn.vue';
-import AddEntry from './modals/AddEntry.vue';
 
 export default {
   name: 'Column',
-  props: ['title', 'id'],
+  props: ['column'],
   components: {
-    RenameColumn,
-    DeleteColumn,
-    AddEntry,
     PencilIcon,
     CloseIcon,
     Entry,
+    draggable,
+  },
+  computed: {
+    shortTitle() {
+      return shorten(this.column.name, 21);
+    },
+    entries: {
+      get() {
+        return this.$store.state.currentTable.columns.filter(
+          x => x.id === this.column.id,
+        )[0].entries;
+      },
+      set(value) {
+        this.reorderEntries({ columnId: this.column.id, entries: value });
+      },
+    },
   },
   methods: {
-    showDeleteColumnModal(columnId, columnName) {
+    ...mapActions(['reorderEntries']),
+    showDeleteColumnModal(column) {
       this.$modal.show('delete-column', {
         height: 'auto',
-        columnId,
-        columnName,
+        clickToClose: false,
+        column,
       });
     },
-    showRenameColumnModal(columnId, columnName) {
+    showRenameColumnModal(column) {
       this.$modal.show('rename-column', {
         height: 'auto',
-        columnId,
-        columnName,
+        clickToClose: false,
+        column,
       });
     },
     showAddEntryModal(columnId) {
       this.$modal.show('add-entry', {
         height: 'auto',
+        clickToClose: false,
+        columnId,
+      });
+    },
+    showDeleteEntryModal(columnId, entry) {
+      this.$modal.show('delete-entry', {
+        height: 'auto',
+        clickToClose: false,
+        entry,
         columnId,
       });
     },

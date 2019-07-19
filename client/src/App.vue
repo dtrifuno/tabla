@@ -48,6 +48,7 @@
   display: flex;
   flex-direction: column;
 }
+
 .dialog-content {
   flex: 1 0 auto;
   width: 100%;
@@ -60,10 +61,6 @@
   flex: 0 1 auto;
   width: 100%;
   border-top: 1px solid #eee;
-}
-
-.dialog-button {
-  flex: 1 1 100%;
 }
 
 .dialog-title {
@@ -79,21 +76,20 @@
   margin: 0;
   border: 0;
 
+  flex: 1 1 100%;
   box-sizing: border-box;
   line-height: 40px;
   height: 40px;
-}
 
-.dialog-button:hover {
-  background: rgba(0, 0, 0, 0.01);
-}
-
-.dialog-button:active {
-  background: rgba(0, 0, 0, 0.025);
-}
-
-.dialog-button:not(:first-of-type) {
-  border-left: 1px solid #eee;
+  &:hover {
+    background: rgba(0, 0, 0, 0.01);
+  }
+  &:active {
+    background: rgba(0, 0, 0, 0.025);
+  }
+  &:not(:first-of-type) {
+    border-left: 1px solid #eee;
+  }
 }
 
 .material-design-icon.icon-2x {

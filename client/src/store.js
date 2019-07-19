@@ -3,7 +3,6 @@ import Vuex from 'vuex';
 
 import {
   getTables,
-  putTables,
   getTable,
   postTable,
   putTable,
@@ -12,8 +11,10 @@ import {
   putColumn,
   deleteColumn,
   postEntry,
+  putEntry,
+  deleteEntry,
 } from './api';
-import { sortByPrev, prevFromOrder, promiseForEach } from './util';
+import { sortByPrev, prevFromOrder, badPrevs } from './util';
 
 Vue.use(Vuex);
 
@@ -36,11 +37,11 @@ const mutations = {
   setCurrentTable(state, table) {
     state.currentTable = table;
   },
-  addColumn(state, column) {
-    state.currentTable.columns.push(column);
-  },
   setColumns(state, columns) {
     state.currentTable.columns = columns;
+  },
+  addColumn(state, column) {
+    state.currentTable.columns.push(column);
   },
   removeColumn(state, columnId) {
     const { currentTable } = state;
@@ -57,6 +58,16 @@ const mutations = {
     const column = columns.filter(x => x.id === columnId)[0];
     column.entries.push(entry);
   },
+  removeEntry(state, { columnId, entryId }) {
+    const { columns } = state.currentTable;
+    const column = columns.filter(x => x.id === columnId)[0];
+    column.entries = column.entries.filter(x => x.id !== entryId);
+  },
+  setColumnEntries(state, { columnId, entries }) {
+    const { columns } = state.currentTable;
+    const column = columns.filter(x => x.id === columnId)[0];
+    column.entries = entries;
+  },
 };
 
 const actions = {
@@ -72,13 +83,8 @@ const actions = {
   },
   async reorderTables({ state, commit }, tables) {
     const newTables = prevFromOrder(tables);
-    const tablesToPut = [];
-    for (let i = 0; i < tables.length; i += 1) {
-      if (tables[i].prev !== newTables[i].prev) {
-        tablesToPut.push(newTables[i]);
-      }
-    }
-    promiseForEach(tablesToPut, table => putTable(state.token, table)).then(
+    const tablesToPut = badPrevs(tables, newTables);
+    Promise.all(tablesToPut.map(table => putTable(state.token, table))).then(
       commit('setTables', newTables),
     );
   },
@@ -105,7 +111,6 @@ const actions = {
   async createColumn({ commit, state }, name) {
     const tableId = state.currentTable.id;
     const { columns } = state.currentTable;
-    console.log(columns);
     const prev = columns.length ? columns.slice(-1)[0].id : null;
     await postColumn(state.token, tableId, name, prev).then((response) => {
       const column = JSON.parse(response.data);
@@ -114,13 +119,8 @@ const actions = {
   },
   async reorderColumns({ state, commit }, columns) {
     const newColumns = prevFromOrder(columns);
-    const columnsToPut = [];
-    for (let i = 0; i < columns.length; i += 1) {
-      if (columns[i].prev !== newColumns[i].prev) {
-        columnsToPut.push(newColumns[i]);
-      }
-    }
-    promiseForEach(columnsToPut, column => putColumn(state.token, column)).then(
+    const columnsToPut = badPrevs(columns, newColumns);
+    Promise.all(columnsToPut.map(column => putColumn(state.token, column))).then(
       commit('setColumns', newColumns),
     );
   },
@@ -129,26 +129,39 @@ const actions = {
       .then(commit('removeColumn', columnId))
       .then(dispatch('reorderColumns', state.currentTable.columns));
   },
-  // HERE
-  async renameColumn({ commit, state }, { columnId, name }) {
-    await putColumn(state.token, columnId, name).then((response) => {
+  async renameColumn({ commit, state }, { id, name, prev }) {
+    await putColumn(state.token, { id, name, prev }).then((response) => {
       const newColumn = JSON.parse(response.data);
       commit('editColumn', newColumn);
     });
   },
   async createEntry({ commit, state }, { columnId, name }) {
     const column = state.currentTable.columns.filter(x => x.id === columnId)[0];
-    const order = column.length;
-    await postEntry(state.token, columnId, name, order).then((response) => {
-      console.log(response.data);
+    const prev = column.entries.length ? column.entries.slice(-1)[0].id : null;
+    await postEntry(state.token, columnId, name, prev).then((response) => {
       const entry = JSON.parse(response.data);
       commit('addEntry', { columnId, entry });
     });
+  },
+  async reorderEntries({ state, commit }, { columnId, entries }) {
+    const newEntries = prevFromOrder(entries);
+    const entriesToPut = badPrevs(entries, newEntries);
+    Promise.all(entriesToPut.map(entry => putEntry(state.token, columnId, entry))).then(
+      commit('setColumnEntries', { columnId, entries: newEntries }),
+    );
+  },
+  async removeEntry({ commit, dispatch, state }, { entry, columnId }) {
+    await deleteEntry(state.token, entry.id)
+      .then(commit('removeEntry', { columnId, entryId: entry.id }))
+      .then(dispatch('reorderColumns', state.currentTable.columns));
   },
   async setCurrentTable({ commit, state }, tableId) {
     await getTable(state.token, tableId).then((response) => {
       const table = JSON.parse(response.data);
       table.columns = sortByPrev(table.columns);
+      for (const column of table.columns) {
+        column.entries = sortByPrev(column.entries);
+      }
       commit('setCurrentTable', table);
     });
   },

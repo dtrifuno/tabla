@@ -4,6 +4,7 @@
     name="delete-table"
     transition="pop-out"
     :adaptive="adaptive"
+    :clickToClose="false"
     :height="height"
     @before-open="beforeOpen"
   >
@@ -37,13 +38,11 @@ export default {
       height: 'auto',
       tableId: '',
       tableName: '',
-      modal: 0,
     };
   },
   methods: {
     ...mapActions(['removeTable']),
     beforeOpen(event) {
-      console.log(event);
       this.tableId = event.params.tableId;
       this.tableName = event.params.tableName;
     },

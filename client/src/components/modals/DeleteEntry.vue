@@ -1,7 +1,7 @@
 
 <template>
   <modal
-    name="delete-column"
+    name="delete-entry"
     transition="pop-out"
     :adaptive="adaptive"
     :clickToClose="false"
@@ -10,13 +10,13 @@
   >
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Delete a column</div>
+        <div class="dialog-title">Delete an entry</div>
         <div class="dialog-c-text">
+          <p>Are you sure you want to delete the entry:</p>
           <p>
-            Are you sure you want to delete the column
-            <b>{{this.column.name}}</b>?
+            <b>{{this.entry.name}}</b>
           </p>
-          <p>This action will delete all entries in the column and cannot be undone.</p>
+          <p>This action cannot be undone.</p>
         </div>
       </div>
       <div class="dialog-buttons">
@@ -31,26 +31,27 @@
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'delete-column',
+  name: 'delete-entry',
   data() {
     return {
       adaptive: true,
-      column: {},
+      entry: {},
       height: 'auto',
       modal: 0,
     };
   },
   methods: {
-    ...mapActions(['removeColumn']),
+    ...mapActions(['removeEntry']),
     beforeOpen(event) {
-      this.column = event.params.column;
+      this.entry = event.params.entry;
+      this.columnId = event.params.columnId;
     },
     closeModal() {
-      this.$modal.hide('delete-column');
+      this.$modal.hide('delete-entry');
     },
     async confirmClick() {
-      this.removeColumn(this.column.id);
-      this.$modal.hide('delete-column');
+      this.removeEntry({ entry: this.entry, columnId: this.columnId });
+      this.$modal.hide('delete-entry');
     },
   },
 };

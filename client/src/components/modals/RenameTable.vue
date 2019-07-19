@@ -4,6 +4,7 @@
     name="rename-table"
     transition="pop-out"
     :adaptive="adaptive"
+    :clickToClose="false"
     :height="height"
     @closed="onClose"
     @before-open="beforeOpen"

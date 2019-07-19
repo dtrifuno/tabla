@@ -4,6 +4,7 @@
     name="rename-column"
     transition="pop-out"
     :adaptive="adaptive"
+    :clickToClose="false"
     :height="height"
     @closed="onClose"
     @before-open="beforeOpen"
@@ -16,7 +17,7 @@
           <div class="form-group">
             <label for="title-form">
               Enter a new title for the column
-              <b>{{this.columnName}}</b>:
+              <b>{{this.column.name}}</b>:
             </label>
             <input
               id="title-form"
@@ -44,8 +45,7 @@ export default {
   data() {
     return {
       newColumnName: '',
-      columnId: '',
-      columnName: '',
+      column: {},
       adaptive: true,
       height: 'auto',
     };
@@ -57,15 +57,15 @@ export default {
     },
     async renameClick() {
       await this.renameColumn({
-        columnId: this.columnId,
+        id: this.column.id,
         name: this.newColumnName,
+        prev: this.column.prev,
       });
       this.$modal.hide('rename-column');
     },
     beforeOpen(event) {
-      this.newColumnName = event.params.columnName;
-      this.columnName = event.params.columnName;
-      this.columnId = event.params.columnId;
+      this.newColumnName = event.params.column.name;
+      this.column = event.params.column;
     },
     onClose() {
       this.newColumnName = '';

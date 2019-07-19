@@ -3,6 +3,7 @@
   <modal
     name="add-column"
     transition="pop-out"
+    :clickToClose="false"
     :adaptive="adaptive"
     :height="height"
     @closed="onClose"

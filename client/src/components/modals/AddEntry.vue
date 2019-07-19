@@ -4,6 +4,7 @@
     name="add-entry"
     transition="pop-out"
     :adaptive="adaptive"
+    :clickToClose="false"
     :height="height"
     @before-open="beforeOpen"
     @opened="fixFocus"
@@ -11,18 +12,16 @@
   >
     <div class="dialog">
       <div class="dialog-content">
-        <div class="dialog-title">Add entry</div>
-        <div class="dialog-c-text">
-          <div class="form-group">
-            <label for="title-form"></label>
-            <input
-              id="title-form"
-              class="form-control"
-              v-model="entryContent"
-              placeholder="Entry"
-              ref="newEntryInput"
-            />
-          </div>
+        <div class="dialog-title-nopad">Add entry</div>
+        <div class="form-group">
+          <label for="title-form"></label>
+          <input
+            id="title-form"
+            class="form-control"
+            v-model="entryContent"
+            placeholder="Entry"
+            ref="newEntryInput"
+          />
         </div>
       </div>
       <div class="dialog-buttons">
@@ -33,6 +32,13 @@
   </modal>
 </template>
 
+<style lang="scss" scoped>
+.dialog-title-nopad {
+  font-weight: 600;
+}
+</style>
+
+
 <script>
 import { mapActions } from 'vuex';
 
@@ -41,6 +47,7 @@ export default {
   data() {
     return {
       entryContent: '',
+      columnId: '',
       adaptive: true,
       height: 'auto',
       modal: 0,

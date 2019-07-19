@@ -8,10 +8,16 @@
     <delete-entry />
     <div class="mx-auto">
       <div
-        @click="() => showRenameTableModal(this.$store.state.currentTable.id, this.$store.state.currentTable.name)"
+        @click="
+          () =>
+            showRenameTableModal(
+              this.$store.state.currentTable.id,
+              this.$store.state.currentTable.name
+            )
+        "
         class="title-box"
       >
-        <h3 class="title">{{this.shortTableTitle}}</h3>
+        <h3 class="title">{{ this.shortTableTitle }}</h3>
         <pencil-icon class="title-edit-icon icon-2x" />
       </div>
     </div>

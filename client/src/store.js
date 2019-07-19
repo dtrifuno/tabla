@@ -1,3 +1,6 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-shadow */
+
 import Vue from 'vue';
 import Vuex from 'vuex';
 
@@ -32,7 +35,7 @@ const mutations = {
     state.tables = tables;
   },
   removeTable(state, tableId) {
-    state.tables = state.tables.filter(x => x.id !== tableId);
+    state.tables = state.tables.filter((x) => x.id !== tableId);
   },
   setCurrentTable(state, table) {
     state.currentTable = table;
@@ -45,27 +48,27 @@ const mutations = {
   },
   removeColumn(state, columnId) {
     const { currentTable } = state;
-    currentTable.columns = currentTable.columns.filter(x => x.id !== columnId);
+    currentTable.columns = currentTable.columns.filter((x) => x.id !== columnId);
   },
   editColumn(state, newColumn) {
     const { id } = newColumn;
     const { columns } = state.currentTable;
-    const column = columns.filter(x => x.id === id)[0];
+    const column = columns.filter((x) => x.id === id)[0];
     Object.assign(column, newColumn);
   },
   addEntry(state, { entry, columnId }) {
     const { columns } = state.currentTable;
-    const column = columns.filter(x => x.id === columnId)[0];
+    const column = columns.filter((x) => x.id === columnId)[0];
     column.entries.push(entry);
   },
   removeEntry(state, { columnId, entryId }) {
     const { columns } = state.currentTable;
-    const column = columns.filter(x => x.id === columnId)[0];
-    column.entries = column.entries.filter(x => x.id !== entryId);
+    const column = columns.filter((x) => x.id === columnId)[0];
+    column.entries = column.entries.filter((x) => x.id !== entryId);
   },
   setColumnEntries(state, { columnId, entries }) {
     const { columns } = state.currentTable;
-    const column = columns.filter(x => x.id === columnId)[0];
+    const column = columns.filter((x) => x.id === columnId)[0];
     column.entries = entries;
   },
 };
@@ -84,8 +87,8 @@ const actions = {
   async reorderTables({ state, commit }, tables) {
     const newTables = prevFromOrder(tables);
     const tablesToPut = badPrevs(tables, newTables);
-    Promise.all(tablesToPut.map(table => putTable(state.token, table))).then(
-      commit('setTables', newTables),
+    Promise.all(tablesToPut.map((table) => putTable(state.token, table))).then(
+      commit('setTables', newTables)
     );
   },
   async createTable({ commit, state }, title) {
@@ -120,8 +123,8 @@ const actions = {
   async reorderColumns({ state, commit }, columns) {
     const newColumns = prevFromOrder(columns);
     const columnsToPut = badPrevs(columns, newColumns);
-    Promise.all(columnsToPut.map(column => putColumn(state.token, column))).then(
-      commit('setColumns', newColumns),
+    Promise.all(columnsToPut.map((column) => putColumn(state.token, column))).then(
+      commit('setColumns', newColumns)
     );
   },
   async removeColumn({ commit, dispatch, state }, columnId) {
@@ -136,7 +139,7 @@ const actions = {
     });
   },
   async createEntry({ commit, state }, { columnId, name }) {
-    const column = state.currentTable.columns.filter(x => x.id === columnId)[0];
+    const column = state.currentTable.columns.filter((x) => x.id === columnId)[0];
     const prev = column.entries.length ? column.entries.slice(-1)[0].id : null;
     await postEntry(state.token, columnId, name, prev).then((response) => {
       const entry = JSON.parse(response.data);
@@ -146,8 +149,8 @@ const actions = {
   async reorderEntries({ state, commit }, { columnId, entries }) {
     const newEntries = prevFromOrder(entries);
     const entriesToPut = badPrevs(entries, newEntries);
-    Promise.all(entriesToPut.map(entry => putEntry(state.token, columnId, entry))).then(
-      commit('setColumnEntries', { columnId, entries: newEntries }),
+    Promise.all(entriesToPut.map((entry) => putEntry(state.token, columnId, entry))).then(
+      commit('setColumnEntries', { columnId, entries: newEntries })
     );
   },
   async removeEntry({ commit, dispatch, state }, { entry, columnId }) {
@@ -159,9 +162,9 @@ const actions = {
     await getTable(state.token, tableId).then((response) => {
       const table = JSON.parse(response.data);
       table.columns = sortByPrev(table.columns);
-      for (const column of table.columns) {
+      table.columns.forEach((column) => {
         column.entries = sortByPrev(column.entries);
-      }
+      });
       commit('setCurrentTable', table);
     });
   },

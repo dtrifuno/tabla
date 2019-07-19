@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="rename-column"
@@ -17,7 +16,8 @@
           <div class="form-group">
             <label for="title-form">
               Enter a new title for the column
-              <b>{{this.column.name}}</b>:
+              <b>{{ this.column.name }}</b>
+              :
             </label>
             <input
               id="title-form"
@@ -25,12 +25,18 @@
               v-model="newColumnName"
               placeholder="Title"
               ref="newColumnInput"
+              @keyup.enter="triggerRename"
             />
           </div>
         </div>
       </div>
       <div class="dialog-buttons">
-        <button type="button" class="dialog-button" @click="renameClick">RENAME</button>
+        <button
+          type="button"
+          class="dialog-button"
+          @click="renameClick"
+          ref="renameColumnButton"
+        >RENAME</button>
         <button type="button" class="dialog-button" @click="closeModal">CANCEL</button>
       </div>
     </div>
@@ -52,6 +58,10 @@ export default {
   },
   methods: {
     ...mapActions(['renameColumn']),
+    triggerRename(event) {
+      event.stopPropagation();
+      this.$refs.renameColumnButton.click();
+    },
     closeModal() {
       this.$modal.hide('rename-column');
     },

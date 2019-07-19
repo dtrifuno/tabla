@@ -141,9 +141,8 @@ export default {
     },
     entries: {
       get() {
-        return this.$store.state.currentTable.columns.filter(
-          x => x.id === this.column.id,
-        )[0].entries;
+        return this.$store.state.currentTable.columns.filter((x) => x.id === this.column.id)[0]
+          .entries;
       },
       set(value) {
         this.reorderEntries({ columnId: this.column.id, entries: value });

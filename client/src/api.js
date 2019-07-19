@@ -35,7 +35,7 @@ function postTable(token, name, prev) {
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 
@@ -47,7 +47,7 @@ function putTable(token, table) {
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 
@@ -74,7 +74,7 @@ function postColumn(token, tableId, name, prev) {
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 
@@ -86,7 +86,7 @@ function putColumn(token, column) {
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 
@@ -103,7 +103,7 @@ function postEntry(token, columnId, name, prev) {
     { columnId, name, prev },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 
@@ -116,7 +116,7 @@ function putEntry(token, columnId, entry) {
     },
     {
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
 }
 

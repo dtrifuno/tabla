@@ -87,6 +87,4 @@ function badPrevs(arr, newArr) {
   return objsToPut;
 }
 
-export {
- sortByPrev, prevFromOrder, badPrevs, shorten 
-};
+export { sortByPrev, prevFromOrder, badPrevs, shorten };

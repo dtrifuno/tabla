@@ -26,6 +26,17 @@
           @keyup.enter="triggerSignup"
         />
       </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          v-model="confirmPassword"
+          class="form-control"
+          id="confirmPassword"
+          placeholder="Confirm Password"
+          @keyup.enter="triggerSignup"
+        />
+      </div>
       <button
         type="button"
         v-on:click="clickRegister"
@@ -48,7 +59,6 @@ label {
 }
 </style>
 
-
 <script>
 import validator from 'validator';
 import { registerUser } from '../api';
@@ -60,10 +70,12 @@ export default {
     return {
       email: '',
       password: '',
+      confirmPassword: '',
     };
   },
   methods: {
-    triggerSignup() {
+    triggerSignup(event) {
+      event.stopPropagation();
       this.$refs.signUpButton.click();
     },
     accountCreatedModal() {
@@ -91,8 +103,7 @@ export default {
     invalidEmailModal() {
       this.$modal.show('dialog', {
         title: 'Invalid email',
-        text:
-          'You have entered an invalid email. Please check the email field for mistakes.',
+        text: 'You have entered an invalid email. Please check the email field for mistakes.',
       });
     },
     invalidPasswordModal() {
@@ -102,11 +113,23 @@ export default {
           'The password you entered is too short. Please choose a password that is at least six characters.',
       });
     },
+    differentPasswordsModal() {
+      this.$modal.show('dialog', {
+        title: 'Invalid password',
+        text: 'The password fields do not match. Please re-enter your password.',
+      });
+    },
     async clickRegister() {
       if (!validator.isEmail(this.email)) {
         this.invalidEmailModal();
       } else if (this.password.length < 6) {
         this.invalidPasswordModal();
+        this.password = '';
+        this.confirmPassword = '';
+      } else if (this.password !== this.confirmPassword) {
+        this.differentPasswordsModal();
+        this.password = '';
+        this.confirmPassword = '';
       } else {
         await registerUser(this.email, this.password)
           .then(() => {

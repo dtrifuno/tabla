@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="add-column"
@@ -7,6 +6,7 @@
     :adaptive="adaptive"
     :height="height"
     @closed="onClose"
+    @opened="fixFocus"
   >
     <div class="dialog">
       <div class="dialog-content">
@@ -14,7 +14,14 @@
         <div class="dialog-c-text">
           <div class="form-group">
             <label for="title-form">Title of new column</label>
-            <input id="title-form" class="form-control" v-model="columnTitle" placeholder="Title" />
+            <input
+              id="title-form"
+              class="form-control"
+              v-model="columnTitle"
+              placeholder="Title"
+              ref="newColumnInput"
+              @keyup.enter="triggerCreate"
+            />
           </div>
         </div>
       </div>
@@ -22,15 +29,10 @@
         <button
           type="button"
           class="dialog-button"
-          style="flex: 1 1 100%"
           @click="createClick"
+          ref="createColumnButton"
         >CREATE</button>
-        <button
-          type="button"
-          class="dialog-button"
-          style="flex: 1 1 100%"
-          @click="closeModal"
-        >CANCEL</button>
+        <button type="button" class="dialog-button" @click="closeModal">CANCEL</button>
       </div>
     </div>
   </modal>
@@ -51,6 +53,10 @@ export default {
   },
   methods: {
     ...mapActions(['createColumn']),
+    triggerCreate(event) {
+      event.stopPropagation();
+      this.$refs.createColumnButton.click();
+    },
     closeModal() {
       this.$modal.hide('add-column');
     },
@@ -60,6 +66,9 @@ export default {
     },
     onClose() {
       this.columnTitle = '';
+    },
+    fixFocus() {
+      this.$refs.newColumnInput.focus();
     },
   },
 };

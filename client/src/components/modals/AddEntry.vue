@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="add-entry"
@@ -21,11 +20,17 @@
             v-model="entryContent"
             placeholder="Entry"
             ref="newEntryInput"
+            @keyup.enter="triggerCreate"
           />
         </div>
       </div>
       <div class="dialog-buttons">
-        <button type="button" class="dialog-button" @click="createClick">CREATE</button>
+        <button
+          type="button"
+          class="dialog-button"
+          @click="createClick"
+          ref="createEntryButton"
+        >CREATE</button>
         <button type="button" class="dialog-button" @click="closeModal">CANCEL</button>
       </div>
     </div>
@@ -37,7 +42,6 @@
   font-weight: 600;
 }
 </style>
-
 
 <script>
 import { mapActions } from 'vuex';
@@ -55,6 +59,10 @@ export default {
   },
   methods: {
     ...mapActions(['createEntry']),
+    triggerCreate(event) {
+      event.stopPropagation();
+      this.$refs.createEntryButton.click();
+    },
     closeModal() {
       this.$modal.hide('add-entry');
     },

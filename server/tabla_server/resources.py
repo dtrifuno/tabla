@@ -73,7 +73,6 @@ class Tables(Resource):
         current_user = models.User.objects(email=get_jwt_identity()).first()
         tables = models.Table.objects(owner=current_user)
         table_sons = [table.header_to_client() for table in tables]
-        print(table_sons, JSONEncoder().encode(table_sons))
         if current_user:
             return JSONEncoder().encode(table_sons)
         else:
@@ -101,9 +100,8 @@ class Table(Resource):
     def put(self, table_id):
         data = parser.parse_args()
         print(f'got a put to /table/{table_id} - {data}')
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        table = models.Table.objects(
-            id=table_id, owner=current_user).first()
+        user = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(id=table_id, owner=user).first()
         if table:
             table.prev = None
             if data['prev'] is not None:
@@ -116,9 +114,8 @@ class Table(Resource):
     @jwt_required
     def delete(self, table_id):
         print(f'got a delete to /table/{table_id}')
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        table = models.Table.objects(
-            id=table_id, owner=current_user).first()
+        user = models.User.objects(email=get_jwt_identity()).first()
+        table = models.Table.objects(id=table_id, owner=user).first()
         if table:
             table.delete()
             return {}
@@ -131,11 +128,11 @@ class PostTable(Resource):
     def post(self):
         data = parser.parse_args()
         print(f'got a post to /table - {data}')
-        current_user = models.User.objects(email=get_jwt_identity()).first()
-        if current_user is None:
+        user = models.User.objects(email=get_jwt_identity()).first()
+        if user is None:
             return {}, 500
         table = models.Table(
-            name=data['name'][:150], prev=data['prev'], owner=current_user)
+            name=data['name'][:150], prev=data['prev'], owner=user)
         table.save()
         return JSONEncoder().encode(table.to_client())
 
@@ -144,7 +141,7 @@ class Column(Resource):
     @jwt_required
     def put(self, column_id):
         data = parser.parse_args()
-        print(f'got a put to /column/{column_id}')
+        print(f'got a put to /column/{column_id} - {data}')
         owner = models.User.objects(email=get_jwt_identity()).first()
         column = models.Column.objects(id=column_id, owner=owner).first()
         if column is None:
@@ -228,7 +225,6 @@ class PostEntry(Resource):
             entry = models.Entry(
                 name=data['name'], prev=data['prev'], column=column, owner=current_user)
             entry.save()
-            print(entry.to_client())
             return JSONEncoder().encode(entry.to_client())
         else:
             return {}, 500

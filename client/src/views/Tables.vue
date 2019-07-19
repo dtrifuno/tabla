@@ -83,7 +83,6 @@
 }
 </style>
 
-
 <script>
 import { mapActions } from 'vuex';
 import draggable from 'vuedraggable';
@@ -117,7 +116,7 @@ export default {
       this.$modal.show('add-table');
     },
     async titleClick(id) {
-      await this.setCurrentTable(id).then(() => this.$router.push({ path: '/table' }),);
+      await this.setCurrentTable(id).then(() => this.$router.push({ path: '/table' }));
     },
     deleteClick(id, name) {
       this.$modal.show('delete-table', {

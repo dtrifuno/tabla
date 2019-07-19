@@ -38,6 +38,9 @@
       Don't have an account?
       <router-link to="/register" class="text-success">Register for one</router-link>.
     </p>
+    <footer>
+      <a href="https://github.com/dtrifuno/tabla" class="text-success">source code</a>
+    </footer>
   </div>
 </template>
 
@@ -47,7 +50,6 @@ h4 {
   user-select: none;
 }
 </style>
-
 
 <script>
 import { mapActions } from 'vuex';
@@ -64,14 +66,14 @@ export default {
   },
   methods: {
     ...mapActions(['setToken', 'fetchTables']),
-    triggerLogin() {
+    triggerLogin(event) {
+      event.stopPropagation();
       this.$refs.loginButton.click();
     },
     invalidCredentialsModal() {
       this.$modal.show('dialog', {
         title: 'Invalid credentials',
-        text:
-          'Invalid login credentials. Please re-enter your email and password.',
+        text: 'Invalid login credentials. Please re-enter your email and password.',
       });
     },
     async clickLogin() {

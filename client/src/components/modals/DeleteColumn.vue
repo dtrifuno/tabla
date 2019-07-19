@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="delete-column"
@@ -14,14 +13,15 @@
         <div class="dialog-c-text">
           <p>
             Are you sure you want to delete the column
-            <b>{{this.column.name}}</b>?
+            <b>{{ this.column.name }}</b>
+            ?
           </p>
           <p>This action will delete all entries in the column and cannot be undone.</p>
         </div>
       </div>
       <div class="dialog-buttons">
-        <button type="button" class="dialog-button" style="flex: 1 1 100%" @click="confirmClick">YES</button>
-        <button type="button" class="dialog-button" style="flex: 1 1 100%" @click="closeModal">NO</button>
+        <button type="button" class="dialog-button" @click="confirmClick">YES</button>
+        <button type="button" class="dialog-button" @click="closeModal">NO</button>
       </div>
     </div>
   </modal>
@@ -37,7 +37,6 @@ export default {
       adaptive: true,
       column: {},
       height: 'auto',
-      modal: 0,
     };
   },
   methods: {

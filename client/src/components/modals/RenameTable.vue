@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="rename-table"
@@ -17,7 +16,8 @@
           <div class="form-group">
             <label for="title-form">
               Enter a new title for the table
-              <b>{{this.tableName}}</b>:
+              <b>{{ this.tableName }}</b>
+              :
             </label>
             <input
               id="title-form"
@@ -25,12 +25,18 @@
               v-model="newTableName"
               placeholder="Title"
               ref="renameTableInput"
+              @keyup.enter="triggerRename"
             />
           </div>
         </div>
       </div>
       <div class="dialog-buttons">
-        <button type="button" class="dialog-button" @click="renameClick">RENAME</button>
+        <button
+          type="button"
+          class="dialog-button"
+          @click="renameClick"
+          ref="renameTableButton"
+        >RENAME</button>
         <button type="button" class="dialog-button" @click="closeModal">CANCEL</button>
       </div>
     </div>
@@ -54,6 +60,10 @@ export default {
   },
   methods: {
     ...mapActions(['renameCurrentTable', 'fetchTables']),
+    triggerRename(event) {
+      event.stopPropagation();
+      this.$refs.renameTableButton.click();
+    },
     closeModal() {
       this.$modal.hide('rename-table');
     },

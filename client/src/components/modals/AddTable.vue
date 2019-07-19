@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="add-table"
@@ -21,12 +20,18 @@
               v-model="table_name"
               placeholder="Title"
               ref="addTableInput"
+              @keyup.enter="triggerCreate"
             />
           </div>
         </div>
       </div>
       <div class="dialog-buttons">
-        <button type="button" class="dialog-button" @click="createClick">CREATE</button>
+        <button
+          type="button"
+          class="dialog-button"
+          @click="createClick"
+          ref="createTableButton"
+        >CREATE</button>
         <button type="button" class="dialog-button" @click="closeModal">CANCEL</button>
       </div>
     </div>
@@ -48,6 +53,10 @@ export default {
   },
   methods: {
     ...mapActions(['createTable']),
+    triggerCreate(event) {
+      event.stopPropagation();
+      this.$refs.createTableButton.click();
+    },
     closeModal() {
       this.$modal.hide('add-table');
     },

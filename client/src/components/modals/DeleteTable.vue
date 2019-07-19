@@ -1,4 +1,3 @@
-
 <template>
   <modal
     name="delete-table"
@@ -14,7 +13,8 @@
         <div class="dialog-c-text">
           <p>
             Are you sure you want to delete the table
-            <b>{{this.tableName}}</b>?
+            <b>{{ this.tableName }}</b>
+            ?
           </p>
           <p>This action will delete all entries in the table and cannot be undone.</p>
         </div>
